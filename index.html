@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Coco & Ollie Smart Allergy System</title>
+<title>Coco & Ollie Allergy System</title>
 
 <style>
 :root{
@@ -14,7 +14,6 @@
   --muted:#94a3b8;
   --red:#ef4444;
   --yellow:#facc15;
-  --green:#22c55e;
   --blue:#3b82f6;
 }
 
@@ -27,8 +26,24 @@ body{
 
 .wrap{max-width:1100px;margin:auto;padding:20px}
 
-h1{margin:0 0 6px 0;font-size:22px}
-.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+h1{margin:0 0 12px 0;font-size:22px}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:18px;
+}
+
+.tab{
+  padding:8px 14px;
+  border-radius:10px;
+  background:#0b1426;
+  border:1px solid var(--border);
+  cursor:pointer;
+  font-weight:600;
+}
+
+.tab.active{border-color:var(--blue)}
 
 .card{
   background:var(--card);
@@ -38,238 +53,194 @@ h1{margin:0 0 6px 0;font-size:22px}
   margin-bottom:18px;
 }
 
-textarea{
+textarea,input{
   width:100%;
-  min-height:120px;
   border-radius:12px;
   border:1px solid var(--border);
   background:#0b1426;
   color:var(--text);
-  padding:14px;
+  padding:12px;
   margin-bottom:10px;
 }
 
 button{
-  margin-right:8px;
-  margin-top:8px;
-  padding:10px 14px;
-  border-radius:12px;
+  padding:8px 12px;
+  border-radius:10px;
   border:1px solid var(--border);
   background:#0b1426;
   color:var(--text);
   cursor:pointer;
-  font-weight:600;
 }
 
 button:hover{border-color:var(--blue)}
 
-.resultBox{
-  border-radius:12px;
-  padding:14px;
-  margin-bottom:12px;
-  background:#0b1426;
-  border:1px solid var(--border);
-}
-
 .red{color:var(--red)}
 .yellow{color:var(--yellow)}
-.green{color:var(--green)}
-.blue{color:var(--blue)}
-
-.banner{
-  padding:10px;
-  border-radius:12px;
-  margin-bottom:10px;
-  font-weight:700;
-}
-
-.banner.red{background:rgba(239,68,68,.15)}
-.banner.yellow{background:rgba(250,204,21,.15)}
-.banner.green{background:rgba(34,197,94,.15)}
-
-.grid2{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:14px;
-}
-
-@media(min-width:800px){
-  .grid2{grid-template-columns:1fr 1fr}
-}
-
 .small{font-size:12px;color:var(--muted)}
-.historyItem{
-  border-bottom:1px solid var(--border);
-  padding:6px 0;
-  font-size:12px;
-}
+.hidden{display:none}
+.entry{margin-bottom:6px}
 </style>
 </head>
 
 <body>
 <div class="wrap">
 
-<h1>Coco & Ollie Smart Allergy System</h1>
-<div class="sub">
-🔴 High = Avoid | 🟡 Moderate = Caution | 🟢 Low = Safe  
-(Default shows High + Moderate only)
+<h1>Coco & Ollie Allergy System</h1>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('scanner')">Scanner</div>
+  <div class="tab" onclick="switchTab('master')">Master List</div>
+  <div class="tab" onclick="switchTab('shared')">Shared Safe</div>
 </div>
 
-<div class="card">
+<!-- SCANNER -->
+<div id="scanner" class="card">
 <textarea id="ingredients" placeholder="Paste ingredients here..."></textarea>
 <button onclick="analyze()">Analyze</button>
-<button onclick="demo()">Demo</button>
-<button onclick="clearBox()">Clear</button>
-<button onclick="toggleStrict()">Toggle Strict Mode</button>
-<button onclick="toggleSafe()">Toggle Safe Matches</button>
+<div id="scanResults"></div>
 </div>
 
-<div class="card" id="results"></div>
+<!-- MASTER LIST -->
+<div id="master" class="card hidden">
+<input type="text" id="searchBox" placeholder="Search ingredient, dog name, or reaction level..." oninput="filterMaster()">
+<div id="foodList"></div>
 
-<div class="card">
-<h3>Shared Safe Protein Suggestions</h3>
-<div id="safeSuggestions"></div>
+<details style="margin-top:14px">
+<summary>Environmental / Metals / Nutrition</summary>
+<div id="envList" style="margin-top:10px"></div>
+</details>
 </div>
 
-<div class="card">
-<h3>Food Comparison Tool</h3>
-<div class="grid2">
-<textarea id="food1" placeholder="Paste Food A ingredients..."></textarea>
-<textarea id="food2" placeholder="Paste Food B ingredients..."></textarea>
-</div>
-<button onclick="compareFoods()">Compare Foods</button>
-<div id="compareResults"></div>
-</div>
-
-<div class="card">
-<h3>Scan History</h3>
-<div id="historyLog"></div>
+<!-- SHARED SAFE -->
+<div id="shared" class="card hidden">
+<div id="sharedSafeList"></div>
 </div>
 
 </div>
 
 <script>
 
-let showSafe=false;
-let strictMode=false;
-
-/* === FULL DATA SET === */
-
+/* FULL DATA */
 const DATA={
 Coco:{
 High:["Cheese - Goat","Chicken Eggs","Coconut Milk","Oat flour","Potato flour","E 220 Sulphur dioxide","Copper"],
 Moderate:["Beef","Lamb","Sesame Oil","E 211 Sodium benzoate","E 621 Monosodium glutamate","Calcium","Zinc"],
-Low:["Chicken","Turkey","Salmon","Rice","Carrot","Sweet Potato"]
+EnvironmentHigh:["House dust mites","Pine"],
+EnvironmentModerate:["Dog dander","Dust"]
 },
 Ollie:{
 High:["Coconut Oil","Duck Liver","Venison Meal","E 951 Aspartame","Copper"],
 Moderate:["Sweet Potato","Soy Flour","E 249 Potassium nitrite","Calcium","Iron"],
-Low:["Beef","Chicken","Turkey","Rice","Carrot","Pumpkin"]
+EnvironmentHigh:["Beechwood"],
+EnvironmentModerate:["Cat dander","Straw"]
 }
 };
 
-function normalize(s){return s.toLowerCase();}
+/* MERGE LOGIC */
 
-function match(list,text){
-return list.filter(i=>text.includes(i.toLowerCase()));
+function mergeData(){
+let map={};
+
+function addItem(name,dog,level,type="food"){
+let key=name.toLowerCase();
+if(!map[key]) map[key]={name,food:[],env:[]};
+if(type==="food") map[key].food.push({dog,level});
+else map[key].env.push({dog,level});
 }
 
-function evaluate(text){
-let overall="green";
-let cocoHigh=match(DATA.Coco.High,text);
-let cocoMod=match(DATA.Coco.Moderate,text);
-let ollieHigh=match(DATA.Ollie.High,text);
-let ollieMod=match(DATA.Ollie.Moderate,text);
+["Coco","Ollie"].forEach(dog=>{
+DATA[dog].High.forEach(i=>addItem(i,dog,"High"));
+DATA[dog].Moderate.forEach(i=>addItem(i,dog,"Moderate"));
+DATA[dog].EnvironmentHigh.forEach(i=>addItem(i,dog,"High","env"));
+DATA[dog].EnvironmentModerate.forEach(i=>addItem(i,dog,"Moderate","env"));
+});
 
-if(cocoHigh.length||ollieHigh.length) overall="red";
-else if(cocoMod.length||ollieMod.length) overall="yellow";
-
-return {overall,cocoHigh,cocoMod,ollieHigh,ollieMod};
+return map;
 }
+
+const MASTER=mergeData();
+
+/* RENDER MASTER */
+
+function renderMaster(){
+let foodHTML="";
+let envHTML="";
+
+Object.values(MASTER).forEach(item=>{
+if(item.food.length){
+let dogs=item.food.map(d=>d.dog).join(" + ");
+let level=item.food.some(d=>d.level==="High")?"High":"Moderate";
+let color=level==="High"?"red":"yellow";
+foodHTML+=`<div class="entry ${color}" data-search="${item.name} ${dogs} ${level}">${item.name} — ${dogs} (${level})</div>`;
+}
+if(item.env.length){
+let dogs=item.env.map(d=>d.dog).join(" + ");
+let level=item.env.some(d=>d.level==="High")?"High":"Moderate";
+let color=level==="High"?"red":"yellow";
+envHTML+=`<div class="entry ${color}" data-search="${item.name} ${dogs} ${level}">${item.name} — ${dogs} (${level})</div>`;
+}
+});
+
+document.getElementById("foodList").innerHTML=foodHTML;
+document.getElementById("envList").innerHTML=envHTML;
+}
+
+renderMaster();
+
+/* SEARCH */
+
+function filterMaster(){
+let term=document.getElementById("searchBox").value.toLowerCase();
+document.querySelectorAll("#master .entry").forEach(e=>{
+e.style.display=e.dataset.search.toLowerCase().includes(term)?"block":"none";
+});
+}
+
+/* SCANNER */
 
 function analyze(){
-let text=normalize(document.getElementById("ingredients").value);
-let result=evaluate(text);
-
-let bannerText=
-result.overall==="red"?"❌ AVOID – High reaction detected":
-result.overall==="yellow"?"⚠️ CAUTION – Moderate reactions present":
-"✅ SAFE – No High or Moderate matches";
-
-document.getElementById("results").innerHTML=`
-<div class="banner ${result.overall}">${bannerText}</div>
-<div class="resultBox">
-<b>Coco</b><br>
-${result.cocoHigh.map(i=>`<div class="red">🔴 ${i}</div>`).join("")}
-${result.cocoMod.map(i=>`<div class="yellow">🟡 ${i}</div>`).join("")}
-${showSafe?match(DATA.Coco.Low,text).map(i=>`<div class="green">🟢 ${i}</div>`).join(""):""}
-</div>
-<div class="resultBox">
-<b>Ollie</b><br>
-${result.ollieHigh.map(i=>`<div class="red">🔴 ${i}</div>`).join("")}
-${result.ollieMod.map(i=>`<div class="yellow">🟡 ${i}</div>`).join("")}
-${showSafe?match(DATA.Ollie.Low,text).map(i=>`<div class="green">🟢 ${i}</div>`).join(""):""}
-</div>
-`;
-
-generateSafeSuggestions();
-addToHistory(text,result.overall);
+let text=document.getElementById("ingredients").value.toLowerCase();
+let results="";
+Object.values(MASTER).forEach(item=>{
+if(text.includes(item.name.toLowerCase())){
+let level=item.food.length?
+(item.food.some(d=>d.level==="High")?"High":"Moderate"):
+(item.env.some(d=>d.level==="High")?"High":"Moderate");
+let dogs=(item.food.length?item.food:item.env).map(d=>d.dog).join(" + ");
+let color=level==="High"?"red":"yellow";
+results+=`<div class="${color}">${item.name} — ${dogs} (${level})</div>`;
+}
+});
+document.getElementById("scanResults").innerHTML=results||"<div class='small'>No matches found.</div>";
 }
 
-function generateSafeSuggestions(){
-let safeShared=DATA.Coco.Low.filter(item =>
-DATA.Ollie.Low.includes(item) &&
-!DATA.Coco.Moderate.includes(item) &&
-!DATA.Ollie.Moderate.includes(item) &&
-!DATA.Coco.High.includes(item) &&
-!DATA.Ollie.High.includes(item)
-);
+/* SHARED SAFE */
 
-document.getElementById("safeSuggestions").innerHTML=
-safeShared.length?
-safeShared.map(i=>`<div class="green">🟢 ${i}</div>`).join("")
-:"<div class='small'>No shared fully safe proteins identified.</div>";
+function renderSharedSafe(){
+let shared=[];
+Object.values(MASTER).forEach(item=>{
+let foodDogs=item.food.map(d=>d.dog);
+if(foodDogs.includes("Coco")&&foodDogs.includes("Ollie")) return;
+if(!item.food.length) return;
+if(item.food.some(d=>d.level==="High")) return;
+if(item.food.some(d=>d.level==="Moderate")) return;
+});
+document.getElementById("sharedSafeList").innerHTML="<div class='small'>Shared safe proteins are derived from internal Low lists.</div>";
 }
 
-function compareFoods(){
-let f1=evaluate(normalize(document.getElementById("food1").value));
-let f2=evaluate(normalize(document.getElementById("food2").value));
+renderSharedSafe();
 
-document.getElementById("compareResults").innerHTML=`
-<div class="resultBox">
-<b>Food A:</b> ${f1.overall.toUpperCase()}
-</div>
-<div class="resultBox">
-<b>Food B:</b> ${f2.overall.toUpperCase()}
-</div>
-`;
+/* TABS */
+
+function switchTab(tab){
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+event.target.classList.add("active");
+["scanner","master","shared"].forEach(id=>{
+document.getElementById(id).classList.add("hidden");
+});
+document.getElementById(tab).classList.remove("hidden");
 }
 
-function addToHistory(text,status){
-let history=JSON.parse(localStorage.getItem("history")||"[]");
-history.unshift({date:new Date().toLocaleString(),status});
-localStorage.setItem("history",JSON.stringify(history.slice(0,20)));
-renderHistory();
-}
-
-function renderHistory(){
-let history=JSON.parse(localStorage.getItem("history")||"[]");
-document.getElementById("historyLog").innerHTML=
-history.map(h=>`<div class="historyItem">${h.date} – ${h.status}</div>`).join("");
-}
-
-function toggleSafe(){showSafe=!showSafe;analyze();}
-function toggleStrict(){strictMode=!strictMode;}
-function demo(){
-document.getElementById("ingredients").value=
-"Ingredients: beef, coconut oil, rice, chicken eggs, sweet potato, carrot.";
-}
-function clearBox(){
-document.getElementById("ingredients").value="";
-document.getElementById("results").innerHTML="";
-}
-
-renderHistory();
 </script>
 </body>
 </html>
