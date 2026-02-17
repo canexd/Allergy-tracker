@@ -6,55 +6,82 @@
 <title>Coco & Ollie Food System</title>
 
 <style>
-body{
-background:#0f1c2e;
-color:#fff;
-font-family:system-ui;
-margin:0;
-padding:20px;
-}
+  body{
+    background:#0f1c2e;
+    color:#fff;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    margin:0;
+    padding:20px;
+  }
+  h1{text-align:center;margin:8px 0 18px}
+  .tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    margin-bottom:18px;
+  }
+  button{
+    background:#1f2f4a;
+    color:white;
+    border:none;
+    padding:11px 18px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  button.active{background:#2f6df6}
+  .card{
+    background:#16243a;
+    padding:16px;
+    border-radius:16px;
+    margin:0 auto 18px;
+    max-width:720px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  h2{margin:0 0 10px}
+  input,textarea,select{
+    width:100%;
+    padding:12px;
+    margin:7px 0;
+    border-radius:12px;
+    border:none;
+    background:#1e2e4a;
+    color:white;
+    box-sizing:border-box;
+    font-size:16px;
+  }
+  textarea{min-height:92px; resize:vertical}
 
-h1{text-align:center}
+  .row{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  }
+  .row > * {flex:1}
+  .pill{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.2px;
+  }
+  .pill-high{background:rgba(255,92,92,.18); color:#ff7a7a; border:1px solid rgba(255,92,92,.35)}
+  .pill-mod{background:rgba(255,196,92,.15); color:#ffd36a; border:1px solid rgba(255,196,92,.35)}
+  .pill-safe{background:rgba(76,255,136,.15); color:#6dff9b; border:1px solid rgba(76,255,136,.35)}
 
-.tabs{
-display:flex;
-flex-wrap:wrap;
-gap:8px;
-justify-content:center;
-margin-bottom:20px;
-}
-
-button{
-background:#1f2f4a;
-color:white;
-border:none;
-padding:10px 16px;
-border-radius:8px;
-cursor:pointer;
-}
-
-button.active{background:#2f6df6}
-.card{
-background:#16243a;
-padding:16px;
-border-radius:12px;
-margin-bottom:20px;
-}
-
-input,textarea,select{
-width:100%;
-padding:10px;
-margin:6px 0;
-border-radius:8px;
-border:none;
-background:#1e2e4a;
-color:white;
-}
-
-textarea{min-height:80px}
-
-.result-high{color:#ff5c5c}
-.result-safe{color:#4cff88}
+  .result{
+    padding:10px 12px;
+    border-radius:12px;
+    margin-top:8px;
+    background:#122035;
+    border:1px solid rgba(255,255,255,.06);
+    line-height:1.35;
+  }
+  .r-safe{color:#6dff9b}
+  .r-bad{color:#ff7a7a}
+  .subtle{opacity:.85; font-size:13px}
+  .divider{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
 </style>
 </head>
 <body>
@@ -62,130 +89,209 @@ textarea{min-height:80px}
 <h1>Coco & Ollie Food System</h1>
 
 <div class="tabs">
-<button onclick="showTab('scanner')" id="tab-scanner" class="active">Scanner</button>
-<button onclick="showTab('meal')" id="tab-meal">Meal Planner</button>
-<button onclick="showTab('shared')" id="tab-shared">Shared Safe</button>
+  <button onclick="showTab('scanner')" id="tab-scanner" class="active">Scanner</button>
+  <button onclick="showTab('meal')" id="tab-meal">Meal Planner</button>
+  <button onclick="showTab('shared')" id="tab-shared">Shared Safe</button>
 </div>
 
 <div id="scanner" class="card">
-<h2>Ingredient Scanner</h2>
-<textarea id="scanInput" placeholder="Paste ingredients..."></textarea>
-<button onclick="runDemo()">Demo</button>
-<button onclick="scanIngredients()">Scan</button>
-<div id="scanResults"></div>
+  <h2>Ingredient Scanner</h2>
+  <div class="subtle">Paste ingredients (comma or line separated). Results will show which dog(s) react + severity.</div>
+  <textarea id="scanInput" placeholder="Example: chicken, coconut oil, pumpkin puree"></textarea>
+  <div class="row">
+    <button onclick="runDemo()">Demo</button>
+    <button onclick="scanIngredients()">Scan</button>
+  </div>
+  <div id="scanResults"></div>
 </div>
 
 <div id="meal" class="card" style="display:none">
-<h2>Meal Planner</h2>
+  <h2>Meal Planner</h2>
+  <div class="subtle">
+    This planner only uses foods marked as <b>No Reactivity</b> for both dogs.
+    Output shows <b>lbs + oz</b> (and cups).
+  </div>
 
-<label>Coco weight (lbs)</label>
-<input type="number" id="cocoWeight" value="55">
+  <label>Coco weight (lbs)</label>
+  <input type="number" id="cocoWeight" value="55" min="1" step="1">
 
-<label>Ollie weight (lbs)</label>
-<input type="number" id="ollieWeight" value="65">
+  <label>Ollie weight (lbs)</label>
+  <input type="number" id="ollieWeight" value="65" min="1" step="1">
 
-<label>Feeding % bodyweight</label>
-<input type="range" id="feedPercent" min="1.5" max="4" step="0.1" value="2.5">
-<div id="percentLabel">2.5%</div>
+  <label>Feeding % of bodyweight per day</label>
+  <input type="range" id="feedPercent" min="1.5" max="4" step="0.1" value="2.5">
+  <div class="subtle"><span id="percentLabel">2.5%</span></div>
 
-<label>Meals per day</label>
-<select id="mealsPerDay">
-<option value="1">1</option>
-<option value="2" selected>2</option>
-<option value="3">3</option>
-</select>
+  <label>Meals per day</label>
+  <select id="mealsPerDay">
+    <option value="1">1</option>
+    <option value="2" selected>2</option>
+    <option value="3">3</option>
+  </select>
 
-<label>Batch days</label>
-<input type="range" id="batchDays" min="1" max="7" value="7">
-<div id="batchLabel">7 days</div>
+  <label>Batch days</label>
+  <input type="range" id="batchDays" min="1" max="7" value="7">
+  <div class="subtle"><span id="batchLabel">7 days</span></div>
 
-<button onclick="generateMeal()">Generate Meal</button>
-<button onclick="exportGrocery()">Export Grocery List</button>
+  <div class="divider"></div>
 
-<div id="mealOutput"></div>
+  <label>For liquids (bone broth, etc.), display as</label>
+  <select id="liquidUnit">
+    <option value="fl_oz" selected>fl oz (US)</option>
+    <option value="cups">cups</option>
+  </select>
+
+  <div class="row">
+    <button onclick="generateMeal()">Generate Meal</button>
+    <button onclick="exportGrocery()">Export Grocery List</button>
+  </div>
+
+  <div id="mealOutput"></div>
 </div>
 
 <div id="shared" class="card" style="display:none">
-<h2>Shared Safe Foods</h2>
-<div id="sharedList"></div>
+  <h2>Shared Safe Foods</h2>
+  <div class="subtle">This is your safe library used for meal ideas (only No Reactivity for both).</div>
+  <div class="divider"></div>
+  <div id="sharedList"></div>
 </div>
 
 <script>
-
 /* =============================
-   ALLERGY DATA
+   ALLERGY DATA (HIGH/MOD only)
+   (We exclude these from meals.)
 ============================= */
 
 const cocoModerate = [
-"beef","coconut","cornflakes","egg yolk - chicken","egg yolk - duck",
-"hare","iceberg lettuce","lemon","pecan nut","pepper - green",
-"psyllium seed husk","strawberry","turnip","winkles"
+  "ammonium laureth sulfate","beef","bilberry","cheese - cheddar","chlorella","coconut",
+  "cornflakes","egg yolk - chicken","egg yolk - duck","hare","iceberg lettuce","lemon",
+  "pecan nut","pepper - green","psyllium seed husk","strawberry","turnip","winkles"
 ];
 
 const cocoHigh = [
-"canola oil","chia seeds","clove","haddock","herring",
-"mozzarella","paprika","peach","rabbit","rabbit heart",
-"rabbit liver","rapeseed oil","sugar (brown)","sweet potato","tahini"
+  "canola oil","chia seeds","clove","haddock","herring","mozzarella","paprika","peach",
+  "rabbit","rabbit heart","rabbit liver","rapeseed oil","sugar (brown)","sweet potato","tahini"
 ];
 
 const ollieModerate = [
-"anchovy","catfish","cheese - cottage","chicken heart",
-"condensed milk","cream","egg white - chicken","emmer wheat",
-"farina secalis cerealis","ginkgo biloba","greens (collard)",
-"lamb liver","liver - ox","milkweed","onion","pepper - green",
-"pheasant gizzard","pigeon","raisin","skate","soy flour",
-"sweet potato","tilefish","winkles"
+  "anchovy","catfish","cheese - cottage","chicken heart","condensed milk","cream",
+  "egg white - chicken","emmer wheat","farina secalis cerealis","ginkgo biloba","greens (collard)",
+  "lamb liver","liver - ox","milkweed","onion","pepper - green","pheasant gizzard","pigeon",
+  "raisin","skate","soy flour","sweet potato","tilefish","winkles"
 ];
 
 const ollieHigh = [
-"avocado oil","boar","buttermilk","canola meal","coconut",
-"coconut oil","crab","duck liver","noodles - wheat",
-"papaya","parmesan","prawn","sage","strawberry",
-"tapioca","venison meal"
+  "avocado oil","boar","buttermilk","canola meal","coconut","coconut oil","crab","duck liver",
+  "noodles - wheat","papaya","parmesan","prawn","sage","strawberry","tapioca","venison meal"
 ];
 
 /* =============================
    SAFE FOOD LIBRARY
-   (Only safe foods)
+   Only foods that are considered generally dog-safe.
+   ALSO: We will FILTER OUT anything that appears in
+   ANY dog’s High/Moderate lists.
 ============================= */
 
+// Proteins (dog-safe)
 const proteins = [
-"chicken","turkey","salmon","sardine","mackerel",
-"lamb","venison","duck","bison"
+  "chicken","turkey","duck","lamb","bison","venison","salmon","sardine"
 ];
 
+// Carbs (dog-safe)
 const carbs = [
-"rice (white)","rice (brown)","oats","barley","quinoa"
+  "rice (white)","rice (brown)","oats","barley","quinoa"
 ];
 
+// Veggies (dog-safe)
 const veggies = [
-"carrot","zucchini","spinach","broccoli","green beans"
+  "carrot","zucchini","spinach","broccoli","green beans","pumpkin"
 ];
 
+// Fats (dog-safe)
 const fats = [
-"olive oil","fish oil","salmon oil"
+  "olive oil","fish oil","salmon oil"
 ];
 
+// Flavor boosters (dog-safe)
 const flavorBoosters = [
-"pumpkin puree","blueberries","bone broth",
-"plain yogurt","apple","parsley"
+  "pumpkin puree","bone broth","blueberries","apple","parsley"
 ];
+
+/* =============================
+   HELPERS
+============================= */
+
+function norm(s){
+  return (s||"").toLowerCase().trim().replace(/\s+/g," ");
+}
+
+function severityForDog(item, dog){
+  item = norm(item);
+  if(dog==="coco"){
+    if(cocoHigh.includes(item)) return "High";
+    if(cocoModerate.includes(item)) return "Moderate";
+    return null;
+  }
+  if(dog==="ollie"){
+    if(ollieHigh.includes(item)) return "High";
+    if(ollieModerate.includes(item)) return "Moderate";
+    return null;
+  }
+  return null;
+}
+
+function isBannedForEither(item){
+  item = norm(item);
+  return cocoHigh.includes(item) || cocoModerate.includes(item) || ollieHigh.includes(item) || ollieModerate.includes(item);
+}
+
+function pickRandom(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function ozToCups(oz){
+  // rough kitchen conversion for mixed foods
+  // 1 cup ~ 4 oz (by volume estimate). This is intentionally approximate.
+  return oz/4;
+}
+
+function ozToLbsOz(totalOz){
+  const lbs = Math.floor(totalOz/16);
+  const oz = totalOz - (lbs*16);
+  return {lbs, oz};
+}
+
+function fmtLbsOz(totalOz){
+  const {lbs, oz} = ozToLbsOz(totalOz);
+  const ozFixed = oz.toFixed(1).replace(/\.0$/,"");
+  if(lbs <= 0) return `${ozFixed} oz`;
+  return `${lbs} lb ${ozFixed} oz`;
+}
+
+function approxFlOzFromOzWeight(ozWeight){
+  // If user is measuring broth, we can treat 1 oz (weight) ~ 1 fl oz (volume) for water-like liquids.
+  // Not perfect, but good enough for broth.
+  return ozWeight;
+}
+
+function fmtLiquid(ozWeight){
+  const unit = document.getElementById("liquidUnit").value;
+  const flOz = approxFlOzFromOzWeight(ozWeight);
+  if(unit==="cups"){
+    return `${(flOz/8).toFixed(2).replace(/0+$/,"").replace(/\.$/,"")} cups`;
+  }
+  return `${flOz.toFixed(1).replace(/\.0$/,"")} fl oz`;
+}
 
 /* =============================
    TAB SWITCH
 ============================= */
 
 function showTab(tab){
-document.getElementById("scanner").style.display="none";
-document.getElementById("meal").style.display="none";
-document.getElementById("shared").style.display="none";
-
-document.getElementById("tab-scanner").classList.remove("active");
-document.getElementById("tab-meal").classList.remove("active");
-document.getElementById("tab-shared").classList.remove("active");
-
-document.getElementById(tab).style.display="block";
-document.getElementById("tab-"+tab).classList.add("active");
+  ["scanner","meal","shared"].forEach(t=>{
+    document.getElementById(t).style.display = (t===tab) ? "block" : "none";
+    document.getElementById("tab-"+t).classList.toggle("active", t===tab);
+  });
 }
 
 /* =============================
@@ -193,101 +299,209 @@ document.getElementById("tab-"+tab).classList.add("active");
 ============================= */
 
 function scanIngredients(){
-let input=document.getElementById("scanInput").value.toLowerCase();
-let items=input.split(/[\n,]+/);
-let output="";
+  const raw = document.getElementById("scanInput").value || "";
+  const items = raw.split(/[\n,]+/).map(x=>norm(x)).filter(Boolean);
 
-items.forEach(item=>{
-let i=item.trim();
-if(!i)return;
+  if(items.length===0){
+    document.getElementById("scanResults").innerHTML = "<div class='result subtle'>Paste some ingredients first.</div>";
+    return;
+  }
 
-let cocoBad=cocoModerate.includes(i)||cocoHigh.includes(i);
-let ollieBad=ollieModerate.includes(i)||ollieHigh.includes(i);
+  let html = "";
+  items.forEach(i=>{
+    const cocoSev = severityForDog(i,"coco");
+    const ollieSev = severityForDog(i,"ollie");
 
-if(cocoBad||ollieBad){
-output+=`<div class='result-high'>${i} — NOT SAFE</div>`;
-}else{
-output+=`<div class='result-safe'>${i} — SAFE</div>`;
-}
-});
+    const anyBad = !!(cocoSev || ollieSev);
 
-document.getElementById("scanResults").innerHTML=output;
+    if(anyBad){
+      const reasons = [];
+      if(cocoSev) reasons.push(`Coco: ${cocoSev}`);
+      if(ollieSev) reasons.push(`Ollie: ${ollieSev}`);
+
+      const sevPills = reasons.map(r=>{
+        const sev = r.includes("High") ? "high" : "mod";
+        return `<span class="pill pill-${sev}">${r}</span>`;
+      }).join(" ");
+
+      html += `
+        <div class="result r-bad">
+          <div><b>${i}</b> — NOT SAFE</div>
+          <div style="margin-top:6px">${sevPills}</div>
+        </div>
+      `;
+    }else{
+      html += `
+        <div class="result r-safe">
+          <div><b>${i}</b> — SAFE</div>
+          <div class="subtle" style="margin-top:6px">No reactivity listed for Coco or Ollie.</div>
+        </div>
+      `;
+    }
+  });
+
+  document.getElementById("scanResults").innerHTML = html;
 }
 
 function runDemo(){
-document.getElementById("scanInput").value="Chicken\nBeef\nPumpkin Puree\nCoconut";
-scanIngredients();
+  document.getElementById("scanInput").value = "Chicken\nBeef\nPumpkin Puree\nCoconut Oil\nBone Broth";
+  scanIngredients();
 }
 
 /* =============================
    MEAL PLANNER
 ============================= */
 
-document.getElementById("feedPercent").oninput=function(){
-document.getElementById("percentLabel").innerText=this.value+"%";
+document.getElementById("feedPercent").oninput = function(){
+  document.getElementById("percentLabel").innerText = this.value + "%";
+}
+document.getElementById("batchDays").oninput = function(){
+  document.getElementById("batchLabel").innerText = this.value + " days";
 }
 
-document.getElementById("batchDays").oninput=function(){
-document.getElementById("batchLabel").innerText=this.value+" days";
-}
+let groceryData = null;
 
-let groceryData={};
+function filteredSafe(arr){
+  return arr.map(norm).filter(x=>!isBannedForEither(x));
+}
 
 function generateMeal(){
+  const cocoLbs = parseFloat(document.getElementById("cocoWeight").value || "0");
+  const ollieLbs = parseFloat(document.getElementById("ollieWeight").value || "0");
+  const percent = parseFloat(document.getElementById("feedPercent").value || "2.5") / 100;
+  const meals = parseInt(document.getElementById("mealsPerDay").value || "2", 10);
+  const days = parseInt(document.getElementById("batchDays").value || "7", 10);
 
-let coco=parseFloat(document.getElementById("cocoWeight").value);
-let ollie=parseFloat(document.getElementById("ollieWeight").value);
-let percent=parseFloat(document.getElementById("feedPercent").value)/100;
-let meals=parseInt(document.getElementById("mealsPerDay").value);
-let days=parseInt(document.getElementById("batchDays").value);
+  if(!cocoLbs || !ollieLbs){
+    document.getElementById("mealOutput").innerHTML = "<div class='result subtle'>Enter both weights.</div>";
+    return;
+  }
 
-let cocoDaily=coco*percent*16;
-let ollieDaily=ollie*percent*16;
+  // Daily food in oz (by bodyweight % rule)
+  const cocoDailyOz = cocoLbs * percent * 16;
+  const ollieDailyOz = ollieLbs * percent * 16;
 
-let totalDaily=cocoDaily+ollieDaily;
+  // Per meal
+  const cocoPerMealOz = cocoDailyOz / meals;
+  const olliePerMealOz = ollieDailyOz / meals;
 
-let protein=proteins[Math.floor(Math.random()*proteins.length)];
-let carb=carbs[Math.floor(Math.random()*carbs.length)];
-let veg=veggies[Math.floor(Math.random()*veggies.length)];
-let fat=fats[Math.floor(Math.random()*fats.length)];
-let flavor=flavorBoosters[Math.floor(Math.random()*flavorBoosters.length)];
+  // Batch totals (both dogs combined)
+  const totalDailyOz = cocoDailyOz + ollieDailyOz;
+  const batchTotalOz = totalDailyOz * days;
 
-let batchTotal=totalDaily*days;
+  // Safe ingredient pools (filtered to exclude any Moderate/High for either dog)
+  const pSafe = filteredSafe(proteins);
+  const cSafe = filteredSafe(carbs);
+  const vSafe = filteredSafe(veggies);
+  const fSafe = filteredSafe(fats);
+  const bSafe = filteredSafe(flavorBoosters);
 
-groceryData={
-[protein]:(batchTotal*0.5/16).toFixed(2)+" lbs",
-[carb]:(batchTotal*0.2/16).toFixed(2)+" lbs",
-[veg]:(batchTotal*0.15/16).toFixed(2)+" lbs",
-[fat]:(batchTotal*0.1/16).toFixed(2)+" lbs",
-[flavor]:(batchTotal*0.05/16).toFixed(2)+" lbs"
-};
+  // If a pool gets empty, we still want the app to not break
+  const protein = pSafe.length ? pickRandom(pSafe) : "chicken";
+  const carb    = cSafe.length ? pickRandom(cSafe) : "rice (white)";
+  const veg     = vSafe.length ? pickRandom(vSafe) : "carrot";
+  const fat     = fSafe.length ? pickRandom(fSafe) : "olive oil";
+  const boost   = bSafe.length ? pickRandom(bSafe) : "pumpkin puree";
 
-document.getElementById("mealOutput").innerHTML=
-`
-<h3>Meal Suggestion</h3>
-Protein: ${protein}<br>
-Carb: ${carb}<br>
-Veg: ${veg}<br>
-Fat: ${fat}<br>
-Flavor: ${flavor}<br><br>
+  // Macro split for the batch (by weight) – simple home-cook heuristic
+  // Protein 50% / Carb 20% / Veg 15% / Fat 5% / Flavor 10% (broth/puree/etc)
+  const proteinOz = batchTotalOz * 0.50;
+  const carbOz    = batchTotalOz * 0.20;
+  const vegOz     = batchTotalOz * 0.15;
+  const fatOz     = batchTotalOz * 0.05;
+  const boostOz   = batchTotalOz * 0.10;
 
-Coco Daily: ${cocoDaily.toFixed(2)} oz (~${(cocoDaily/4).toFixed(2)} cups)<br>
-Ollie Daily: ${ollieDaily.toFixed(2)} oz (~${(ollieDaily/4).toFixed(2)} cups)<br><br>
+  groceryData = {
+    protein: {name: protein, oz: proteinOz},
+    carb:    {name: carb, oz: carbOz},
+    veg:     {name: veg, oz: vegOz},
+    fat:     {name: fat, oz: fatOz},
+    boost:   {name: boost, oz: boostOz},
+    meta:    {days, meals, cocoDailyOz, ollieDailyOz, cocoPerMealOz, olliePerMealOz, batchTotalOz}
+  };
 
-Batch (${days} days): ${(batchTotal/16).toFixed(2)} lbs
-`;
+  const out = `
+    <div class="divider"></div>
+    <h3 style="margin:0 0 6px">Meal Suggestion</h3>
+    <div class="subtle">All picks are filtered to exclude any Moderate/High for either dog.</div>
+
+    <div class="divider"></div>
+
+    <div><b>Protein:</b> ${protein}</div>
+    <div><b>Carb:</b> ${carb}</div>
+    <div><b>Veg:</b> ${veg}</div>
+    <div><b>Fat:</b> ${fat}</div>
+    <div><b>Flavor/Boost:</b> ${boost} <span class="subtle">(great for taste + moisture)</span></div>
+
+    <div class="divider"></div>
+
+    <h3 style="margin:0 0 6px">Feeding Amounts</h3>
+    <div><b>Coco daily:</b> ${fmtLbsOz(cocoDailyOz)} (~${ozToCups(cocoDailyOz).toFixed(2)} cups)</div>
+    <div><b>Coco per meal:</b> ${fmtLbsOz(cocoPerMealOz)} (~${ozToCups(cocoPerMealOz).toFixed(2)} cups)</div>
+
+    <div style="margin-top:10px"><b>Ollie daily:</b> ${fmtLbsOz(ollieDailyOz)} (~${ozToCups(ollieDailyOz).toFixed(2)} cups)</div>
+    <div><b>Ollie per meal:</b> ${fmtLbsOz(olliePerMealOz)} (~${ozToCups(olliePerMealOz).toFixed(2)} cups)</div>
+
+    <div class="divider"></div>
+
+    <h3 style="margin:0 0 6px">Batch Cook (${days} day${days===1?"":"s"})</h3>
+    <div><b>Total batch food:</b> ${fmtLbsOz(batchTotalOz)} (~${ozToCups(batchTotalOz).toFixed(2)} cups)</div>
+
+    <div class="divider"></div>
+
+    <h3 style="margin:0 0 6px">Grocery Breakdown</h3>
+    <div class="subtle">Measured as lbs+oz. For broth/liquids we also show fl oz.</div>
+
+    <div class="result">
+      <div><b>${protein}</b> — ${fmtLbsOz(proteinOz)}</div>
+      <div><b>${carb}</b> — ${fmtLbsOz(carbOz)}</div>
+      <div><b>${veg}</b> — ${fmtLbsOz(vegOz)}</div>
+      <div><b>${fat}</b> — ${fmtLbsOz(fatOz)}</div>
+      <div><b>${boost}</b> — ${fmtLbsOz(boostOz)} <span class="subtle">(≈ ${fmtLiquid(boostOz)})</span></div>
+    </div>
+  `;
+
+  document.getElementById("mealOutput").innerHTML = out;
 }
-
-/* =============================
-   GROCERY EXPORT
-============================= */
 
 function exportGrocery(){
-let text="Grocery List:\n\n";
-for(let item in groceryData){
-text+=item+" — "+groceryData[item]+"\n";
-}
-alert(text);
+  if(!groceryData){
+    alert("Generate a meal first.");
+    return;
+  }
+  const g = groceryData;
+
+  const text =
+`Coco & Ollie Grocery List
+
+Batch: ${g.meta.days} day(s)
+Meals/day: ${g.meta.meals}
+
+INGREDIENTS (lbs + oz)
+- ${g.protein.name}: ${fmtLbsOz(g.protein.oz)}
+- ${g.carb.name}: ${fmtLbsOz(g.carb.oz)}
+- ${g.veg.name}: ${fmtLbsOz(g.veg.oz)}
+- ${g.fat.name}: ${fmtLbsOz(g.fat.oz)}
+- ${g.boost.name}: ${fmtLbsOz(g.boost.oz)} (≈ ${fmtLiquid(g.boost.oz)})
+
+FEEDING AMOUNTS
+Coco daily: ${fmtLbsOz(g.meta.cocoDailyOz)} (~${ozToCups(g.meta.cocoDailyOz).toFixed(2)} cups)
+Coco per meal: ${fmtLbsOz(g.meta.cocoPerMealOz)} (~${ozToCups(g.meta.cocoPerMealOz).toFixed(2)} cups)
+
+Ollie daily: ${fmtLbsOz(g.meta.ollieDailyOz)} (~${ozToCups(g.meta.ollieDailyOz).toFixed(2)} cups)
+Ollie per meal: ${fmtLbsOz(g.meta.olliePerMealOz)} (~${ozToCups(g.meta.olliePerMealOz).toFixed(2)} cups)
+`;
+
+  // Copy to clipboard if possible, else show an alert
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      alert("Copied grocery list to clipboard ✅");
+    }).catch(()=>{
+      alert(text);
+    });
+  }else{
+    alert(text);
+  }
 }
 
 /* =============================
@@ -295,11 +509,21 @@ alert(text);
 ============================= */
 
 function loadShared(){
-document.getElementById("sharedList").innerHTML=
-[...proteins,...carbs,...veggies,...fats,...flavorBoosters]
-.join("<br>");
-}
+  const all = [
+    {title:"Proteins", items: filteredSafe(proteins)},
+    {title:"Carbs", items: filteredSafe(carbs)},
+    {title:"Veggies", items: filteredSafe(veggies)},
+    {title:"Fats", items: filteredSafe(fats)},
+    {title:"Flavor Boosters", items: filteredSafe(flavorBoosters)}
+  ];
 
+  let html = "";
+  all.forEach(group=>{
+    html += `<div style="margin-bottom:14px"><b>${group.title}</b><div class="subtle">${group.items.join(", ") || "None available (filtered out)"}</div></div>`;
+  });
+
+  document.getElementById("sharedList").innerHTML = html;
+}
 loadShared();
 
 </script>
