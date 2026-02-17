@@ -1,81 +1,60 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Coco & Ollie Allergy + Meal Planner</title>
 
 <style>
-:root{
---bg:#0f172a;
---card:#111c2e;
---border:#22304a;
---text:#e6edf6;
---muted:#94a3b8;
---red:#ef4444;
---yellow:#facc15;
---green:#22c55e;
---blue:#3b82f6;
-}
-body{
-margin:0;
-background:linear-gradient(180deg,#0b1220,#0f172a);
-font-family:system-ui;
-color:var(--text);
-}
-.wrap{max-width:1100px;margin:auto;padding:20px}
-.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-.tab{padding:8px 14px;border-radius:10px;background:#0b1426;border:1px solid var(--border);cursor:pointer;font-weight:600}
-.tab.active{border-color:var(--blue)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px}
-textarea,input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0b1426;color:var(--text);margin-bottom:10px}
-button{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#0b1426;color:var(--text);cursor:pointer;margin:4px}
-button:hover{border-color:var(--blue)}
-.hidden{display:none}
-.red{color:var(--red)}
-.yellow{color:var(--yellow)}
-.banner{padding:8px;border-radius:8px;margin-bottom:10px}
-.banner.red{background:rgba(239,68,68,.15)}
-.banner.yellow{background:rgba(250,204,21,.15)}
-.banner.green{background:rgba(34,197,94,.15)}
-.small{font-size:12px;color:var(--muted)}
-.entry{margin-bottom:6px}
-.savedItem{margin-bottom:6px}
+body{font-family:system-ui;background:#0f172a;color:#e2e8f0;margin:0}
+.container{max-width:1100px;margin:auto;padding:20px}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.tab-btn{background:#1e293b;border:1px solid #334155;color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer}
+.tab-btn.active{background:#2563eb}
+.section{display:none}
+.section.active{display:block}
+input,textarea,select{width:100%;padding:8px;margin-bottom:10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff}
+button{padding:8px 12px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff;cursor:pointer}
+button:hover{background:#2563eb}
+.red{color:#ef4444}
+.yellow{color:#facc15}
+.card{background:#111827;padding:15px;border-radius:12px;margin-bottom:15px}
+.small{font-size:12px;color:#94a3b8}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="container">
 
 <div class="tabs">
-<div class="tab active" onclick="switchTab(event,'scanner')">Scanner</div>
-<div class="tab" onclick="switchTab(event,'master')">Master List</div>
-<div class="tab" onclick="switchTab(event,'shared')">Shared Safe</div>
-<div class="tab" onclick="switchTab(event,'meal')">Meal Builder</div>
+<button class="tab-btn active" onclick="switchTab('scanner')">Scanner</button>
+<button class="tab-btn" onclick="switchTab('master')">Master List</button>
+<button class="tab-btn" onclick="switchTab('shared')">Shared Safe</button>
+<button class="tab-btn" onclick="switchTab('meal')">Meal Planner</button>
 </div>
 
 <!-- SCANNER -->
-<div id="scanner" class="card">
-<textarea id="ingredients" placeholder="Paste ingredients here..."></textarea>
-<button onclick="analyze()">Analyze</button>
+<div id="scanner" class="section active card">
+<textarea id="scanInput" placeholder="Paste ingredient list..."></textarea>
 <button onclick="demo()">Demo</button>
+<button onclick="analyze()">Analyze</button>
 <div id="scanResults"></div>
 </div>
 
 <!-- MASTER -->
-<div id="master" class="card hidden">
-<input id="searchBox" placeholder="Search ingredient, dog name, or reaction level..." oninput="filterMaster()">
+<div id="master" class="section card">
+<input id="searchMaster" placeholder="Search ingredient, dog, or level..." oninput="renderMaster()">
 <div id="masterList"></div>
 </div>
 
 <!-- SHARED -->
-<div id="shared" class="card hidden">
-<h3>Shared Safe Ingredients (Strict LOW Only)</h3>
+<div id="shared" class="section card">
+<h3>Shared Safe Ingredients</h3>
 <div id="sharedList"></div>
 </div>
 
-<!-- MEAL BUILDER -->
-<div id="meal" class="card hidden">
-<h3>Meal Builder</h3>
+<!-- MEAL -->
+<div id="meal" class="section card">
+<h3>Meal Planner</h3>
 
 <label>Coco Weight (lbs)</label>
 <input type="number" id="cocoWeight">
@@ -83,23 +62,31 @@ button:hover{border-color:var(--blue)}
 <label>Ollie Weight (lbs)</label>
 <input type="number" id="ollieWeight">
 
-<label>Feeding %: <span id="feedVal">2.5%</span></label>
-<input type="range" min="2" max="3" step="0.1" value="2.5" id="feedSlider" oninput="updateFeedVal()">
+<label>Feeding %</label>
+<input type="range" min="2" max="3" step="0.1" value="2.5" id="feedPercent" oninput="updateFeed()">
+<div id="feedDisplay" class="small">2.5%</div>
 
-<label>Batch Cook Days: <span id="dayVal">7</span></label>
-<input type="range" min="1" max="7" step="1" value="7" id="daySlider" oninput="updateDayVal()">
+<label>Activity Level</label>
+<select id="activity">
+<option value="1.2">Sedentary</option>
+<option value="1.5" selected>Normal</option>
+<option value="1.8">Active</option>
+<option value="2.0">Very Active</option>
+</select>
 
-<h4>Category Toggles</h4>
-<label><input type="checkbox" class="cat" value="poultry" checked> Poultry</label>
-<label><input type="checkbox" class="cat" value="fish" checked> Fish</label>
-<label><input type="checkbox" class="cat" value="grains" checked> Grains</label>
-<label><input type="checkbox" class="cat" value="pseudo" checked> Pseudo-grains</label>
-<label><input type="checkbox" class="cat" value="veg" checked> Vegetables</label>
-<label><input type="checkbox" class="cat" value="flavor" checked> Flavor Boosters</label>
+<label>Meals per day</label>
+<select id="mealsPerDay">
+<option value="1">1</option>
+<option value="2" selected>2</option>
+<option value="3">3</option>
+</select>
 
-<br><br>
+<label>Batch Days (1–7)</label>
+<input type="range" min="1" max="7" value="7" id="batchDays" oninput="updateBatch()">
+<div id="batchDisplay" class="small">7 days</div>
+
 <button onclick="generateMeal()">Generate Meal</button>
-<button onclick="saveMeal()">⭐ Save Meal</button>
+<button onclick="saveMeal()">Save Meal</button>
 
 <div id="mealOutput"></div>
 <div id="groceryOutput"></div>
@@ -107,227 +94,295 @@ button:hover{border-color:var(--blue)}
 <h4>Saved Meals</h4>
 <div id="savedMeals"></div>
 
-<div class="small">
-Always add calcium + multivitamin. Consult vet for long-term feeding.
-</div>
 </div>
 
 </div>
 
 <script>
 
-/* HIGH + MODERATE LIST */
+// ---------------- ALLERGY DATABASE ----------------
 
-const MASTER_DATA=[
-{name:"Beef",dogs:["Coco"],level:"Moderate"},
-{name:"Sweet Potato",dogs:["Ollie"],level:"Moderate"},
-{name:"Oats",dogs:["Coco"],level:"High"},
-{name:"Coconut",dogs:["Ollie"],level:"High"},
-{name:"Venison",dogs:["Ollie"],level:"High"},
-{name:"Duck Liver",dogs:["Ollie"],level:"High"}
-];
+const allergies = {
 
-/* LOW SHARED */
+Coco:{
+High:[
+"Canola Oil","Chia Seeds","Clove","Haddock","Herring","Mozzarella",
+"Paprika","Peach","Rabbit","Rabbit Heart","Rabbit Liver",
+"Rapeseed oil","Sugar (brown)","Sweet Potato","Tahini",
+"E 110 Sunset Yellow (orange synthetic dye)",
+"E 160 b Annatto (yellow to orange coloring)",
+"E 180 Lithol Rubine BK (red synthetic dye)",
+"E 221 Sodium sulphite (preservative)",
+"E 332 Potassium citrate (acidity regulator)",
+"E 483 Stearyl tartrate (emulsifier)",
+"E 576 Sodium gluconate (acidity regulator)",
+"E 620 Glutamic acid (flavour enhancer)",
+"E 959 Neohesperidine DC (sweetener)",
+"Rose (Rosa spp.)"
+],
+Moderate:[
+"Beef","Bilberry","Cheese - Cheddar","Chlorella","Coconut",
+"Cornflakes","Egg Yolk - Chicken","Egg Yolk - Duck","Hare",
+"Iceberg lettuce","Lemon","Pecan nut","Pepper - green",
+"Psyllium Seed Husk","Strawberry","Turnip","Winkles",
+"Artichoke leaf extract","E 200 Sorbic acid (preservative)",
+"E 233 Thiabendazole (preservative/fungicide)",
+"E 312 Dodecyl gallate (antioxidant)",
+"E 340 Potassium phosphate (emulsifier)",
+"E 411 Xantham gum (thickener)",
+"E 528 Magnesium hydroxide (acidity regulator)",
+"E 535 Sodium ferrocyanide (anti-caking agent)",
+"E 624 Monoammonium glutamate (flavour enhancer)",
+"E 629 Calcium guanylate (flavour enhancer)",
+"E 630 Inosinic acid (flavour enhancer)",
+"E 927 Azodicarbonamide (flour treatment agent)",
+"Rosemary Extract"
+]
+},
 
-const LOW_SHARED=["Chicken","Turkey","Rice","Carrot"];
+Ollie:{
+High:[
+"Avocado oil","Boar","Buttermilk","Canola Meal","Coconut",
+"Coconut Oil","Crab","Duck Liver","Noodles - wheat",
+"Papaya","Parmesan","Prawn","Sage","Strawberry",
+"Tapioca","Venison Meal",
+"E 141 Copper complexes of chlorophyll (green coloring)",
+"E 150 d Sulphite Ammonia Caramel (brown coloring)",
+"E 160 e Beta-apo-8'-carotenal (orange pigment)",
+"E 162 Beetroot red (natural red coloring)",
+"E 218 Methyl p-hydroxybenzoate (preservative)",
+"E 242 Dimethyl dicarbonate (sterilizing agent)",
+"E 260 Acetic acid (preservative)",
+"E 263 Calcium acetate (acidity regulator)",
+"E 270 Lactic acid (preservative)",
+"E 335 Sodium tartrate (acidity regulator)",
+"E 472 d Tartaric acid esters of mono- and diglycerides (emulsifier)",
+"E 473 Sucrose esters of fatty acids (emulsifier)",
+"E 477 Propylene glycol esters of fatty acids (emulsifier)",
+"E 522 Aluminium potassium sulphate (stabiliser)",
+"E 541 Sodium aluminium phosphate (raising agent)",
+"E 630 Inosinic acid (flavour enhancer)",
+"E 941 Nitrogen (packing gas)",
+"E 951 Aspartame (sweetener)",
+"Formic acid","Pepsin","Tartaric acid"
+],
+Moderate:[
+"Anchovy","Catfish","Cheese - Cottage","Chicken Heart",
+"Condensed milk","Cream","Egg White - Chicken",
+"Emmer wheat","Farina secalis cerealis","Ginkgo biloba",
+"Greens (Collard)","Lamb Liver","Liver - ox","Milkweed",
+"Onion","Pepper - green","Pheasant Gizzard","Pigeon",
+"Raisin","Skate","Soy Flour","Sweet Potato",
+"Tilefish","Winkles",
+"E 150 c Ammonia Caramel (brown coloring)",
+"E 1520 Propylene glycol","E 249 Potassium nitrite (curing agent)",
+"E 284 Boric acid (preservative)",
+"E 312 Dodecyl gallate (antioxidant)",
+"E 334 Tartaric acid (acidity regulator)",
+"E 353 Metatartaric acid (acidity regulator)",
+"E 354 Calcium tartrate (acidity regulator)",
+"E 472 e Mono- and diacetyltartaric acid esters",
+"E 476 Polyglycerol polyricinoleate (emulsifier)",
+"E 554 Sodium aluminosilicate (anti-caking agent)",
+"E 621 Monosodium glutamate (flavour enhancer)",
+"E 634 Calcium 5'-ribonucleotides (flavour enhancer)",
+"E 902 Candelilla wax (coating agent)",
+"E 903 Carnauba wax (coating agent)",
+"Formalin"
+]
+}
 
-/* POOL */
-
-const POOL={
-poultry:["Chicken","Turkey"],
-fish:["Cod","Pollock","Sardines","Salmon"],
-grains:["White Rice","Brown Rice","Barley"],
-pseudo:["Quinoa","Millet","Buckwheat"],
-veg:["Carrot","Zucchini","Green Beans","Pumpkin","Spinach"],
-flavor:["Bone Broth","Sardine Mash","Olive Oil Drizzle","Pumpkin Puree"]
 };
 
-const EXCLUDE=MASTER_DATA.map(x=>x.name);
+// ---------------- MASTER MERGE ----------------
 
-function switchTab(e,tab){
-document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-e.target.classList.add("active");
-["scanner","master","shared","meal"].forEach(id=>{
-document.getElementById(id).classList.add("hidden");
+function getAllMaster(){
+let list=[];
+for(let dog in allergies){
+allergies[dog].High.forEach(i=>{
+list.push({name:i,dog:dog,level:"High"});
 });
-document.getElementById(tab).classList.remove("hidden");
+allergies[dog].Moderate.forEach(i=>{
+list.push({name:i,dog:dog,level:"Moderate"});
+});
+}
+return list;
+}
+
+// ---------------- RENDER MASTER ----------------
+
+function renderMaster(){
+let term=document.getElementById("searchMaster").value?.toLowerCase()||"";
+let data=getAllMaster().filter(i=>
+i.name.toLowerCase().includes(term)||
+i.dog.toLowerCase().includes(term)||
+i.level.toLowerCase().includes(term)
+);
+
+let html=data.map(i=>{
+let color=i.level==="High"?"red":"yellow";
+return `<div class="${color}">${i.name} — ${i.dog} (${i.level})</div>`;
+}).join("");
+
+document.getElementById("masterList").innerHTML=html||"<div class='small'>No matches.</div>";
+}
+
+renderMaster();
+
+// ---------------- SHARED SAFE (LOGIC B) ----------------
+
+function renderShared(){
+let shared=[];
+let allFood=new Set();
+
+Object.values(allergies).forEach(d=>{
+d.High.forEach(i=>allFood.add(i));
+d.Moderate.forEach(i=>allFood.add(i));
+});
+
+let cocoHighMod=new Set([...allergies.Coco.High,...allergies.Coco.Moderate]);
+let ollieHighMod=new Set([...allergies.Ollie.High,...allergies.Ollie.Moderate]);
+
+let possible=[
+"Chicken","Turkey","Rice (white)","Rice (brown)","Carrot",
+"Cod","Salmon","Pumpkin","Zucchini","Peas","Quinoa","Barley"
+];
+
+possible.forEach(i=>{
+if(!cocoHighMod.has(i) && !ollieHighMod.has(i)){
+shared.push(i);
+}
+});
+
+document.getElementById("sharedList").innerHTML=
+shared.map(i=>`<div>${i}</div>`).join("");
+}
+
+renderShared();
+
+// ---------------- SCANNER ----------------
+
+function demo(){
+document.getElementById("scanInput").value="Ingredients: Chicken, Beef, Coconut Oil, Rice (white)";
 }
 
 function analyze(){
-let text=document.getElementById("ingredients").value.toLowerCase();
-let high=0,mod=0,html="";
-MASTER_DATA.forEach(item=>{
-if(text.includes(item.name.toLowerCase())){
-let color=item.level==="High"?"red":"yellow";
-if(item.level==="High") high++; else mod++;
-html+=`<div class="${color}">${item.name} — ${item.dogs.join(" + ")} (${item.level})</div>`;
+let text=document.getElementById("scanInput").value.toLowerCase();
+let results=[];
+getAllMaster().forEach(i=>{
+if(text.includes(i.name.toLowerCase())){
+results.push(i);
 }
 });
-let banner="SAFE – No High or Moderate matches";
-let bclass="green";
-if(high){banner="AVOID – High reaction detected";bclass="red";}
-else if(mod){banner="CAUTION – Moderate reactions present";bclass="yellow";}
-document.getElementById("scanResults").innerHTML=
-`<div class="banner ${bclass}">${banner}</div>
-<div class="small">High: ${high} | Moderate: ${mod}</div>
-${html||"<div class='small'>No matches found.</div>"}`;
-}
-
-function demo(){
-document.getElementById("ingredients").value=
-"Ingredients: beef, coconut oil, rice, chicken eggs, carrot.";
-}
-
-function renderMaster(){
-document.getElementById("masterList").innerHTML=
-MASTER_DATA.map(item=>{
-let color=item.level==="High"?"red":"yellow";
-return `<div class="entry ${color}" data-search="${item.name} ${item.dogs.join(" ")} ${item.level}">
-${item.name} — ${item.dogs.join(" + ")} (${item.level})
-</div>`;
+let html=results.map(r=>{
+let color=r.level==="High"?"red":"yellow";
+return `<div class="${color}">${r.name} — ${r.dog} (${r.level})</div>`;
 }).join("");
-}
-renderMaster();
-
-function filterMaster(){
-let term=document.getElementById("searchBox").value.toLowerCase();
-document.querySelectorAll("#master .entry").forEach(e=>{
-e.style.display=e.dataset.search.toLowerCase().includes(term)?"block":"none";
-});
+document.getElementById("scanResults").innerHTML=html||"<div class='small'>No reactions found.</div>";
 }
 
-function renderShared(){
-document.getElementById("sharedList").innerHTML=
-LOW_SHARED.map(i=>`<div>${i}</div>`).join("");
+// ---------------- MEAL PLANNER ----------------
+
+function updateFeed(){
+document.getElementById("feedDisplay").innerText=
+document.getElementById("feedPercent").value+"%";
 }
-renderShared();
 
-/* MEAL BUILDER */
-
-let currentMeal=null;
-
-function updateFeedVal(){
-document.getElementById("feedVal").innerText =
-document.getElementById("feedSlider").value+"%";
-}
-function updateDayVal(){
-document.getElementById("dayVal").innerText =
-document.getElementById("daySlider").value;
+function updateBatch(){
+document.getElementById("batchDisplay").innerText=
+document.getElementById("batchDays").value+" days";
 }
 
 function generateMeal(){
-let cocoW=parseFloat(document.getElementById("cocoWeight").value);
-let ollieW=parseFloat(document.getElementById("ollieWeight").value);
-let percent=parseFloat(document.getElementById("feedSlider").value)/100;
-let days=parseInt(document.getElementById("daySlider").value);
-if(!cocoW||!ollieW) return;
+let coco=parseFloat(document.getElementById("cocoWeight").value);
+let ollie=parseFloat(document.getElementById("ollieWeight").value);
+let percent=parseFloat(document.getElementById("feedPercent").value)/100;
+let activity=parseFloat(document.getElementById("activity").value);
+let meals=parseInt(document.getElementById("mealsPerDay").value);
+let days=parseInt(document.getElementById("batchDays").value);
 
-let cats=[...document.querySelectorAll(".cat:checked")].map(c=>c.value);
+if(!coco||!ollie)return;
 
-function rand(cat){
-let items=POOL[cat].filter(i=>!EXCLUDE.includes(i));
-return items[Math.floor(Math.random()*items.length)];
+function dailyOz(w){return w*percent*16;}
+
+function calories(w){
+let kg=w*0.453592;
+let rer=70*Math.pow(kg,0.75);
+return rer*activity;
 }
 
-let protein = cats.includes("poultry")?rand("poultry"):
-cats.includes("fish")?rand("fish"):rand("poultry");
-let carb = cats.includes("grains")?rand("grains"):rand("pseudo");
-let veg = rand("veg");
-let flavor = cats.includes("flavor")?rand("flavor"):"";
+let cocoOz=dailyOz(coco);
+let ollieOz=dailyOz(ollie);
 
-function calc(w){
-let total=w*percent*16;
-return{
-total,
-protein:total*.60,
-carb:total*.25,
-veg:total*.15
-};
-}
+let cocoCal=calories(coco);
+let ollieCal=calories(ollie);
 
-currentMeal={
-protein,carb,veg,flavor,
-coco:calc(cocoW),
-ollie:calc(ollieW),
-days
-};
+let cocoPerMealOz=cocoOz/meals;
+let olliePerMealOz=ollieOz/meals;
 
-displayMeal();
-}
-
-function ozToCups(oz,type){
-if(type==="protein") return (oz/4).toFixed(1);
-if(type==="carb") return (oz/6).toFixed(1);
-return (oz/4).toFixed(1);
-}
-
-function displayMeal(){
-if(!currentMeal) return;
-let {protein,carb,veg,flavor,coco,ollie,days}=currentMeal;
+function cups(oz){return (oz/4).toFixed(2);} 
 
 document.getElementById("mealOutput").innerHTML=`
-<h4>Shared Meal</h4>
-<b>Protein:</b> ${protein}<br>
-<b>Carb:</b> ${carb}<br>
-<b>Veg:</b> ${veg}<br>
-${flavor?`<b>Flavor:</b> ${flavor}<br>`:""}
-
 <h4>Coco</h4>
-Total: ${coco.total.toFixed(1)} oz (~${ozToCups(coco.total,"protein")} cups)<br>
+Daily: ${cocoOz.toFixed(2)} oz (~${cups(cocoOz)} cups)<br>
+Per Meal: ${cocoPerMealOz.toFixed(2)} oz (~${cups(cocoPerMealOz)} cups)<br>
+Calories Needed: ${cocoCal.toFixed(2)} kcal<br><br>
 
 <h4>Ollie</h4>
-Total: ${ollie.total.toFixed(1)} oz (~${ozToCups(ollie.total,"protein")} cups)<br>
+Daily: ${ollieOz.toFixed(2)} oz (~${cups(ollieOz)} cups)<br>
+Per Meal: ${olliePerMealOz.toFixed(2)} oz (~${cups(olliePerMealOz)} cups)<br>
+Calories Needed: ${ollieCal.toFixed(2)} kcal
 `;
 
-let proteinLbs=((coco.protein+ollie.protein)*days/16).toFixed(1);
-let carbLbs=((coco.carb+ollie.carb)*days/16).toFixed(1);
-let vegLbs=((coco.veg+ollie.veg)*days/16).toFixed(1);
-let totalBatch=((coco.total+ollie.total)*days/16).toFixed(1);
+let totalBatch=((cocoOz+ollieOz)*days)/16;
 
 document.getElementById("groceryOutput").innerHTML=`
 <h4>Batch Cook (${days} days)</h4>
-Total Food: <b>${totalBatch} lbs</b><br><br>
-<b>Shopping List:</b><br>
-${proteinLbs} lbs ${protein}<br>
-${carbLbs} lbs ${carb}<br>
-${vegLbs} lbs ${veg}
+Total Food Needed: ${totalBatch.toFixed(2)} lbs
 `;
 }
 
 function saveMeal(){
-if(!currentMeal) return;
-let saved=JSON.parse(localStorage.getItem("savedMeals")||"[]");
-saved.push(currentMeal);
-localStorage.setItem("savedMeals",JSON.stringify(saved));
+let saved=JSON.parse(localStorage.getItem("meals")||"[]");
+saved.push(document.getElementById("mealOutput").innerHTML);
+localStorage.setItem("meals",JSON.stringify(saved));
 renderSaved();
 }
 
 function renderSaved(){
-let saved=JSON.parse(localStorage.getItem("savedMeals")||"[]");
+let saved=JSON.parse(localStorage.getItem("meals")||"[]");
 document.getElementById("savedMeals").innerHTML=
 saved.map((m,i)=>`
-<div class="savedItem">
-<b>${m.protein} + ${m.carb} + ${m.veg}</b>
+<div>
+Meal ${i+1}
 <button onclick="loadMeal(${i})">Load</button>
 <button onclick="deleteMeal(${i})">Delete</button>
 </div>
 `).join("");
 }
-renderSaved();
 
 function loadMeal(i){
-let saved=JSON.parse(localStorage.getItem("savedMeals"));
-currentMeal=saved[i];
-displayMeal();
+let saved=JSON.parse(localStorage.getItem("meals"));
+document.getElementById("mealOutput").innerHTML=saved[i];
 }
 
 function deleteMeal(i){
-let saved=JSON.parse(localStorage.getItem("savedMeals"));
+let saved=JSON.parse(localStorage.getItem("meals"));
 saved.splice(i,1);
-localStorage.setItem("savedMeals",JSON.stringify(saved));
+localStorage.setItem("meals",JSON.stringify(saved));
 renderSaved();
 }
 
+renderSaved();
+
+function switchTab(tab){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(tab).classList.add("active");
+document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+event.target.classList.add("active");
+}
+
 </script>
+
 </body>
 </html>
