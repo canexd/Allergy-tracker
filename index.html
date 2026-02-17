@@ -25,6 +25,7 @@ border:none;
 padding:10px 14px;
 border-radius:10px;
 cursor:pointer;
+margin-top:8px;
 }
 input,textarea,select{
 width:100%;
@@ -47,8 +48,8 @@ cursor:pointer;
 .red{color:#ff5e5e}
 .yellow{color:#ffd65e}
 .green{color:#57e389}
-.small{font-size:12px;color:#9fb2d9}
 .sep{height:1px;background:#1c335f;margin:12px 0}
+.small{font-size:12px;color:#9fb2d9}
 </style>
 </head>
 
@@ -62,22 +63,81 @@ cursor:pointer;
 <div class="tab-btn" onclick="showTab('master')">Master</div>
 <div class="tab-btn" onclick="showTab('shared')">Shared Safe</div>
 <div class="tab-btn" onclick="showTab('meal')">Meal Planner</div>
-<div class="tab-btn" onclick="showTab('saved')">Saved</div>
-<div class="tab-btn" onclick="showTab('history')">History</div>
+</div>
+
+<!-- SCANNER -->
+<div id="scanner" class="tab">
+<div class="card">
+<h3>Ingredient Scanner</h3>
+<textarea id="scanInput" rows="5" placeholder="Paste ingredients (comma or line separated)"></textarea>
+<button onclick="runScan()">Scan</button>
+<div id="scanResults"></div>
+</div>
+</div>
+
+<!-- MASTER -->
+<div id="master" class="tab hidden">
+<div class="card">
+<h3>Master Reactivity</h3>
+<div id="masterList"></div>
+</div>
+</div>
+
+<!-- SHARED SAFE -->
+<div id="shared" class="tab hidden">
+<div class="card">
+<h3>Shared Safe Ingredients</h3>
+<div id="sharedList"></div>
+</div>
+</div>
+
+<!-- MEAL -->
+<div id="meal" class="tab hidden">
+<div class="card">
+<h3>Meal Planner</h3>
+
+<label>Coco weight (lbs)</label>
+<input id="cocoWeight" type="number" value="55">
+
+<label>Ollie weight (lbs)</label>
+<input id="ollieWeight" type="number" value="65">
+
+<label>Feeding % bodyweight</label>
+<input id="feedPct" type="range" min="2" max="3" step="0.1" value="2.5"
+oninput="feedLabel.innerText=this.value+'%'">
+<div class="small" id="feedLabel">2.5%</div>
+
+<label>Meals per day</label>
+<select id="mealsPerDay">
+<option>1</option>
+<option selected>2</option>
+<option>3</option>
+</select>
+
+<label>Batch days</label>
+<input id="batchDays" type="range" min="1" max="7" value="7"
+oninput="batchLabel.innerText=this.value+' days'">
+<div class="small" id="batchLabel">7 days</div>
+
+<button onclick="generateMeal()">Generate Meal</button>
+
+<div id="mealOutput"></div>
+</div>
 </div>
 
 <script>
 
-const DATA = {
+/* ================= DATA ================= */
 
-  coco: {
-    high: [
+const DATA = {
+  coco:{
+    high:[
       "Canola Oil","Chia Seeds","Clove","Haddock","Herring",
       "Mozzarella","Paprika","Peach","Rabbit","Rabbit Heart",
       "Rabbit Liver","Rapeseed oil","Sugar (brown)",
       "Sweet Potato","Tahini"
     ],
-    moderate: [
+    moderate:[
       "Ammonium Laureth Sulfate","Beef","Bilberry",
       "Cheese - Cheddar","Chlorella","Coconut","Cornflakes",
       "Egg Yolk - Chicken","Egg Yolk - Duck","Hare",
@@ -85,15 +145,14 @@ const DATA = {
       "Psyllium Seed Husk","Strawberry","Turnip","Winkles"
     ]
   },
-
-  ollie: {
-    high: [
+  ollie:{
+    high:[
       "Avocado oil","Boar","Buttermilk","Canola Meal","Coconut",
       "Coconut Oil","Crab","Duck Liver","Noodles - wheat",
       "Papaya","Parmesan","Prawn","Sage","Strawberry",
       "Tapioca","Venison Meal"
     ],
-    moderate: [
+    moderate:[
       "Anchovy","Catfish","Cheese - Cottage","Chicken Heart",
       "Condensed milk","Cream","Egg White - Chicken",
       "Emmer wheat","Farina secalis cerealis","Ginkgo biloba",
@@ -103,301 +162,135 @@ const DATA = {
       "Tilefish","Winkles"
     ]
   }
-
 };
 
 function normalize(x){return x.trim().toLowerCase()}
 
 function getReaction(item){
-const i=normalize(item)
-const cHigh=DATA.coco.high.some(x=>normalize(x)==i)
-const cMod=DATA.coco.moderate.some(x=>normalize(x)==i)
-const oHigh=DATA.ollie.high.some(x=>normalize(x)==i)
-const oMod=DATA.ollie.moderate.some(x=>normalize(x)==i)
-
-return{
-coco:cHigh?"high":cMod?"moderate":"low",
-ollie:oHigh?"high":oMod?"moderate":"low"
-}
+  const i=normalize(item)
+  const cHigh=DATA.coco.high.some(x=>normalize(x)==i)
+  const cMod=DATA.coco.moderate.some(x=>normalize(x)==i)
+  const oHigh=DATA.ollie.high.some(x=>normalize(x)==i)
+  const oMod=DATA.ollie.moderate.some(x=>normalize(x)==i)
+  return{
+    coco:cHigh?"high":cMod?"moderate":"low",
+    ollie:oHigh?"high":oMod?"moderate":"low"
+  }
 }
 
 function showTab(id){
-document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"))
-document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"))
-document.querySelector(`[onclick="showTab('${id}')"]`).classList.add("active")
-document.getElementById(id).classList.remove("hidden")
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"))
+  document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"))
+  document.querySelector(`[onclick="showTab('${id}')"]`).classList.add("active")
+  document.getElementById(id).classList.remove("hidden")
 }
-   <script>
 
-/* ================================
-   MASTER REACTIVITY DATA
-================================ */
+/* ================= SCANNER ================= */
 
-// COCO
-const cocoHigh = [
-"Canola Oil","Chia Seeds","Clove","Haddock","Herring","Mozzarella","Paprika",
-"Peach","Rabbit","Rabbit Heart","Rabbit Liver","Rapeseed oil","Sugar (brown)",
-"Sweet Potato","Tahini"
-];
-
-const cocoModerate = [
-"Ammonium Laureth Sulfate","Beef","Bilberry","Cheese - Cheddar",
-"Chlorella","Coconut","Cornflakes","Egg Yolk - Chicken","Egg Yolk - Duck",
-"Hare","Iceberg lettuce","Lemon","Pecan nut","Pepper - green",
-"Psyllium Seed Husk","Strawberry","Turnip","Winkles"
-];
-
-// OLLIE
-const ollieHigh = [
-"Avocado oil","Boar","Buttermilk","Canola Meal","Coconut","Coconut Oil",
-"Crab","Duck Liver","Noodles - wheat","Papaya","Parmesan","Prawn",
-"Sage","Strawberry","Tapioca","Venison Meal"
-];
-
-const ollieModerate = [
-"Anchovy","Catfish","Cheese - Cottage","Chicken Heart","Condensed milk",
-"Cream","Egg White - Chicken","Emmer wheat","Farina secalis cerealis",
-"Ginkgo biloba","Greens (Collard)","Lamb Liver","Liver - ox","Milkweed",
-"Onion","Pepper - green","Pheasant Gizzard","Pigeon","Raisin","Skate",
-"Soy Flour","Sweet Potato","Tilefish","Winkles"
-];
-
-/* ================================
-   BUILD MASTER LIST
-================================ */
-
-function buildMasterList() {
-    const container = document.getElementById("masterListResults");
-    container.innerHTML = "";
-
-    const combined = {};
-
-    function addItems(items, dog, level) {
-        items.forEach(item => {
-            const key = item.toLowerCase();
-            if (!combined[key]) {
-                combined[key] = [];
-            }
-            combined[key].push({ dog, level });
-        });
+function runScan(){
+  const input=document.getElementById("scanInput").value
+  const items=input.split(/[\n,]+/).map(x=>x.trim()).filter(Boolean)
+  const results=document.getElementById("scanResults")
+  results.innerHTML=""
+  items.forEach(item=>{
+    const r=getReaction(item)
+    const div=document.createElement("div")
+    let status=""
+    if(r.coco==="high"||r.ollie==="high"){
+      status="<span class='red'>High</span>"
+    }else if(r.coco==="moderate"||r.ollie==="moderate"){
+      status="<span class='yellow'>Moderate</span>"
+    }else{
+      status="<span class='green'>(Low)</span>"
     }
-
-    addItems(cocoHigh, "Coco", "High");
-    addItems(cocoModerate, "Coco", "Moderate");
-    addItems(ollieHigh, "Ollie", "High");
-    addItems(ollieModerate, "Ollie", "Moderate");
-
-    Object.keys(combined).sort().forEach(item => {
-        const div = document.createElement("div");
-
-        const reactions = combined[item].map(r =>
-            `${r.dog} (${r.level})`
-        ).join(" • ");
-
-        div.innerHTML = `
-            <span class="${combined[item].some(r=>r.level==="High") ? "high" : "moderate"}">
-                ${capitalize(item)} — ${reactions}
-            </span>
-        `;
-
-        container.appendChild(div);
-    });
+    div.innerHTML=`${item} — ${status}`
+    results.appendChild(div)
+  })
 }
 
-function capitalize(str) {
-    return str.replace(/\b\w/g, l => l.toUpperCase());
+/* ================= MASTER ================= */
+
+function buildMaster(){
+  const container=document.getElementById("masterList")
+  container.innerHTML=""
+  const combined={}
+  Object.values(DATA).forEach(dog=>{
+    [...dog.high,...dog.moderate].forEach(item=>{
+      const key=item.toLowerCase()
+      if(!combined[key])combined[key]=[]
+      combined[key].push(dog)
+    })
+  })
+  Object.keys(combined).sort().forEach(item=>{
+    const r=getReaction(item)
+    const div=document.createElement("div")
+    div.innerHTML=`${item} — <span class="${r.coco==="high"||r.ollie==="high"?"red":"yellow"}">
+    ${r.coco==="high"||r.ollie==="high"?"High":"Moderate"}
+    </span>`
+    container.appendChild(div)
+  })
 }
+buildMaster()
 
-/* ================================
-   SEARCH MASTER LIST
-================================ */
+/* ================= SHARED SAFE ================= */
 
-function filterMasterList() {
-    const input = document.getElementById("masterSearch").value.toLowerCase();
-    const items = document.querySelectorAll("#masterListResults div");
+const LIBRARY=["Chicken","Turkey","Salmon","Whitefish","Lamb","Beef","Pork","Goat","Carrot","Pumpkin","Zucchini","Rice","Quinoa","Oats","Barley","Blueberries","Apple"]
 
-    items.forEach(div => {
-        div.style.display = div.innerText.toLowerCase().includes(input)
-            ? "block"
-            : "none";
-    });
+function buildShared(){
+  const container=document.getElementById("sharedList")
+  container.innerHTML=""
+  LIBRARY.forEach(item=>{
+    const r=getReaction(item)
+    if(r.coco==="low"&&r.ollie==="low"){
+      const div=document.createElement("div")
+      div.innerHTML=`<span class="green">${item}</span>`
+      container.appendChild(div)
+    }
+  })
+}
+buildShared()
+
+/* ================= MEAL PLANNER ================= */
+
+function lbsToOz(l){return l*16}
+function ozToCups(o){return o/4}
+function ozToLbs(o){return o/16}
+
+function generateMeal(){
+  const coco=parseFloat(cocoWeight.value)
+  const ollie=parseFloat(ollieWeight.value)
+  const pct=parseFloat(feedPct.value)/100
+  const meals=parseInt(mealsPerDay.value)
+  const days=parseInt(batchDays.value)
+
+  const cocoDaily=lbsToOz(coco*pct)
+  const ollieDaily=lbsToOz(ollie*pct)
+  const totalDaily=cocoDaily+ollieDaily
+
+  const safe=LIBRARY.filter(item=>{
+    const r=getReaction(item)
+    return r.coco==="low"&&r.ollie==="low"
+  })
+
+  const rand=arr=>arr[Math.floor(Math.random()*arr.length)]
+  const protein=rand(safe)
+  const batchTotal=totalDaily*days
+
+  mealOutput.innerHTML=`
+  <div class="card">
+  <h4>Meal Suggestion</h4>
+  Protein: ${protein}
+  <div class="sep"></div>
+  Coco: ${cocoDaily.toFixed(2)} oz (~${ozToCups(cocoDaily).toFixed(2)} cups)
+  <br>Ollie: ${ollieDaily.toFixed(2)} oz (~${ozToCups(ollieDaily).toFixed(2)} cups)
+  <div class="sep"></div>
+  Batch (${days} days): ${batchTotal.toFixed(2)} oz
+  <br>${ozToLbs(batchTotal).toFixed(2)} lbs
+  <br>~${ozToCups(batchTotal).toFixed(2)} cups
+  </div>`
 }
 
 </script>
-/* ================================
-   BUILD BANNED LIST (FIXED)
-================================ */
-
-function buildBannedList() {
-    const banned = new Set();
-
-    Object.values(DATA).forEach(dog => {
-        [...dog.high, ...dog.moderate].forEach(item => {
-            banned.add(item.toLowerCase());
-        });
-    });
-
-    return banned;
-}
-
-const bannedIngredients = buildBannedList();
-
-/* ================================
-   SAFE INGREDIENT LIBRARY
-================================ */
-
-const LIBRARY = {
-    proteins: [
-        "Chicken","Turkey","Salmon","Whitefish",
-        "Lamb","Beef","Pork","Rabbit","Venison","Goat"
-    ],
-    carbs: [
-        "White Rice","Brown Rice","Quinoa",
-        "Oats","Barley","Sweet Potato","Potato","Millet"
-    ],
-    veggies: [
-        "Carrot","Pumpkin","Zucchini","Spinach",
-        "Broccoli","Green Beans","Butternut Squash","Peas"
-    ],
-    fats: [
-        "Olive Oil","Salmon Oil","Sunflower Oil",
-        "Beef Tallow","Chicken Fat"
-    ],
-    flavors: [
-        "Pumpkin Puree","Bone Broth","Parsley",
-        "Blueberries","Apple","Peanut Butter"
-    ]
-};
-
-/* ================================
-   FILTER SAFE INGREDIENTS
-================================ */
-
-function filterSafe(list) {
-    return list.filter(item =>
-        !bannedIngredients.has(item.toLowerCase())
-    );
-}
-
-function getSafePools(){
-    return {
-        proteins: filterSafe(LIBRARY.proteins),
-        carbs: filterSafe(LIBRARY.carbs),
-        veggies: filterSafe(LIBRARY.veggies),
-        fats: filterSafe(LIBRARY.fats),
-        flavors: filterSafe(LIBRARY.flavors)
-    };
-}
-
-/* ================================
-   UNIT CONVERSIONS
-================================ */
-
-function lbsToOz(l){ return l * 16; }
-function ozToLbs(o){ return o / 16; }
-function ozToCups(o){ return o / 4; }
-
-/* ================================
-   GENERATE MEAL
-================================ */
-
-function generateMealPlan(){
-
-    const cocoWeight = parseFloat(document.getElementById("cocoWeight").value);
-    const ollieWeight = parseFloat(document.getElementById("ollieWeight").value);
-    const feedPct = parseFloat(document.getElementById("feedPct").value) / 100;
-    const mealsPerDay = parseInt(document.getElementById("mealsPerDay").value);
-    const batchDays = parseInt(document.getElementById("batchDays").value);
-
-    const cocoDailyOz = lbsToOz(cocoWeight * feedPct);
-    const ollieDailyOz = lbsToOz(ollieWeight * feedPct);
-    const totalDailyOz = cocoDailyOz + ollieDailyOz;
-
-    const pools = getSafePools();
-
-    if(
-        !pools.proteins.length ||
-        !pools.carbs.length ||
-        !pools.veggies.length
-    ){
-        alert("No safe ingredients available in one or more categories.");
-        return;
-    }
-
-    const rand = arr => arr[Math.floor(Math.random()*arr.length)];
-
-    const protein = rand(pools.proteins);
-    const carb = rand(pools.carbs);
-    const veg = rand(pools.veggies);
-    const fat = rand(pools.fats);
-    const flavor = pools.flavors.length ? rand(pools.flavors) : "None";
-
-    const batchTotalOz = totalDailyOz * batchDays;
-
-    const output = `
-    <div class="card">
-        <h3>Suggested Shared Meal</h3>
-
-        <p><strong>Protein:</strong> ${protein}</p>
-        <p><strong>Carb:</strong> ${carb}</p>
-        <p><strong>Vegetable:</strong> ${veg}</p>
-        <p><strong>Fat:</strong> ${fat}</p>
-        <p><strong>Flavor Boost:</strong> ${flavor}</p>
-
-        <div class="sep"></div>
-
-        <strong>Coco:</strong> ${cocoDailyOz.toFixed(2)} oz/day 
-        (~${ozToCups(cocoDailyOz).toFixed(2)} cups)<br>
-        Per meal: ${(cocoDailyOz/mealsPerDay).toFixed(2)} oz 
-        (~${ozToCups(cocoDailyOz/mealsPerDay).toFixed(2)} cups)<br><br>
-
-        <strong>Ollie:</strong> ${ollieDailyOz.toFixed(2)} oz/day 
-        (~${ozToCups(ollieDailyOz).toFixed(2)} cups)<br>
-        Per meal: ${(ollieDailyOz/mealsPerDay).toFixed(2)} oz 
-        (~${ozToCups(ollieDailyOz/mealsPerDay).toFixed(2)} cups)<br>
-
-        <div class="sep"></div>
-
-        <strong>Total Batch (${batchDays} days):</strong><br>
-        ${batchTotalOz.toFixed(2)} oz<br>
-        ${ozToLbs(batchTotalOz).toFixed(2)} lbs<br>
-        ~${ozToCups(batchTotalOz).toFixed(2)} cups<br>
-
-        <div class="sep"></div>
-
-        <button onclick="exportGrocery('${protein}','${carb}','${veg}','${fat}','${flavor}',${batchTotalOz})">
-        Export Grocery List
-        </button>
-    </div>
-    `;
-
-    document.getElementById("mealOutput").innerHTML = output;
-}
-
-/* ================================
-   EXPORT GROCERY LIST
-================================ */
-
-function exportGrocery(protein, carb, veg, fat, flavor, totalOz){
-
-    const text = `
-GROCERY LIST
-
-Protein: ${protein}
-Carb: ${carb}
-Vegetable: ${veg}
-Fat: ${fat}
-Flavor Boost: ${flavor}
-
-Total Food Needed:
-${totalOz.toFixed(2)} oz
-${ozToLbs(totalOz).toFixed(2)} lbs
-~${ozToCups(totalOz).toFixed(2)} cups
-`;
-
-    const blob = new Blob([text], {type:"text/plain"});
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "grocery-list.txt";
-    link.click();
-}
+</div>
+</body>
+</html>
