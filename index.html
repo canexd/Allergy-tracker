@@ -3,351 +3,350 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dog Ingredient Checker</title>
+  <title>Allergy Checker (Coco + Ollie)</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background:#fafafa; }
-    .wrap { max-width: 920px; margin: 0 auto; padding: 16px; }
-    h1 { margin: 8px 0 6px; }
-    p { margin: 0 0 12px; opacity: .8; }
-    .card { background: #fff; border: 1px solid #e6e6e6; border-radius: 14px; padding: 14px; margin: 12px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
-    textarea, input { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 12px; border: 1px solid #cfcfcf; font-size: 14px; }
-    button { padding: 10px 12px; border-radius: 12px; border: 1px solid #cfcfcf; background: #fff; cursor: pointer; font-weight: 600; }
-    button:disabled { opacity: .5; cursor: not-allowed; }
-    .row { display:flex; gap:10px; flex-wrap: wrap; align-items: center; }
-    .grow { flex:1; min-width: 220px; }
-    .pill { padding: 6px 10px; border-radius: 999px; border: 1px solid #ddd; font-weight: 800; }
-    .muted { opacity: .75; font-size: 12px; }
-    .dog { border: 1px solid #eee; border-radius: 14px; padding: 12px; margin: 10px 0; }
-    .hr { height: 1px; background: #eee; margin: 10px 0; }
-    .small { font-size: 13px; }
-    .right { margin-left:auto; }
-    .linkish { text-decoration: underline; cursor:pointer; }
+    :root { --bg:#0b0f17; --card:#111828; --muted:#9aa4b2; --text:#e6eaf0; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; --line:#243044; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; background:linear-gradient(180deg,#070a10,#0b0f17); color:var(--text)}
+    .wrap{max-width:980px;margin:0 auto;padding:18px}
+    .title{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+    h1{font-size:18px;margin:0}
+    .sub{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.35}
+    .row{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+    @media (min-width: 860px){ .row{grid-template-columns: 1.1fr .9fr;} }
+    .card{background:rgba(17,24,40,.92); border:1px solid var(--line); border-radius:14px; padding:14px}
+    textarea{width:100%;min-height:160px;border-radius:12px;border:1px solid var(--line); background:#0b1220;color:var(--text);padding:12px;font-size:14px;line-height:1.35;outline:none}
+    textarea:focus{border-color:#3b82f6}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    button{border:1px solid var(--line); background:#0b1220; color:var(--text); padding:10px 12px; border-radius:12px; font-weight:600; cursor:pointer}
+    button:hover{border-color:#3b82f6}
+    .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line); background:#0b1220; padding:8px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+    .dot{width:9px;height:9px;border-radius:50%}
+    .dot.good{background:var(--good)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)}
+    .grid2{display:grid;grid-template-columns:1fr;gap:12px}
+    @media (min-width: 640px){ .grid2{grid-template-columns:1fr 1fr;} }
+    .sectionTitle{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px 0}
+    .dogName{font-size:15px;margin:0}
+    .badge{font-size:12px;color:var(--muted)}
+    .box{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0b1220}
+    .label{font-size:12px;color:var(--muted);margin:0 0 6px 0}
+    ul{margin:8px 0 0 18px;padding:0}
+    li{margin:4px 0;word-break:break-word}
+    .empty{color:var(--muted);font-size:13px}
+    details{border:1px dashed var(--line);border-radius:12px;padding:10px;background:rgba(11,18,32,.55)}
+    summary{cursor:pointer;color:var(--text);font-weight:700}
+    .small{font-size:12px;color:var(--muted);line-height:1.35}
+    .k{color:#c7d2fe}
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <h1>Dog Ingredient Checker</h1>
-    <p>Paste ingredients (copied from a label photo) → get ✅ Safe / ❌ Avoid / ⚠️ Maybe per dog.</p>
+    <div class="title">
+      <div>
+        <h1>Allergy / Sensitivity Ingredient Checker</h1>
+        <div class="sub">
+          Paste ingredients from dog food/treats. You’ll get a per-dog summary:
+          <span class="k">SAFE</span>, <span class="k">CAUTION (Moderate)</span>, <span class="k">AVOID (High)</span>.
+        </div>
+      </div>
+      <div class="pill"><span class="dot good"></span>SAFE &nbsp; <span class="dot warn"></span>CAUTION &nbsp; <span class="dot bad"></span>AVOID</div>
+    </div>
 
-    <div class="card">
-      <h2 style="margin:0 0 8px;">1) Dogs & Avoid Lists</h2>
-      <div id="dogs"></div>
-      <div class="row">
-        <button id="addDog">+ Add dog</button>
-        <span class="muted">Avoid list is comma-separated (you can paste and add commas quickly).</span>
+    <div class="row">
+      <div class="card">
+        <div class="sectionTitle">
+          <div>
+            <div style="font-weight:800;">Paste Ingredients</div>
+            <div class="small">Tip: copy the whole ingredient line (commas are fine).</div>
+          </div>
+        </div>
+        <textarea id="ingredients" placeholder="Example: chicken, sweet potato, glycerin, natural flavors, turmeric..."></textarea>
+        <div class="btns">
+          <button id="run">Check Coco + Ollie</button>
+          <button id="clear">Clear</button>
+          <button id="demo">Paste Demo Ingredients</button>
+        </div>
+
+        <div style="margin-top:12px" class="small">
+          Matching is “best effort” text matching. If a brand uses weird names, paste the full label and it usually catches it.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sectionTitle">
+          <div style="font-weight:800;">Results</div>
+          <div class="badge" id="status">Waiting…</div>
+        </div>
+
+        <div class="grid2">
+          <div class="box" id="cocoBox">
+            <div class="sectionTitle">
+              <h3 class="dogName">Coco</h3>
+              <span class="badge" id="cocoSummary">—</span>
+            </div>
+            <div class="label"><span class="dot bad"></span> AVOID (High)</div>
+            <ul id="cocoHigh"></ul>
+            <div class="label" style="margin-top:10px;"><span class="dot warn"></span> CAUTION (Moderate)</div>
+            <ul id="cocoMod"></ul>
+          </div>
+
+          <div class="box" id="ollieBox">
+            <div class="sectionTitle">
+              <h3 class="dogName">Ollie</h3>
+              <span class="badge" id="ollieSummary">—</span>
+            </div>
+            <div class="label"><span class="dot bad"></span> AVOID (High)</div>
+            <ul id="ollieHigh"></ul>
+            <div class="label" style="margin-top:10px;"><span class="dot warn"></span> CAUTION (Moderate)</div>
+            <ul id="ollieMod"></ul>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="small">
+          If you want this stricter (only exact matches) or looser (more fuzzy matching), tell me — it’s a 2-minute tweak.
+        </div>
       </div>
     </div>
 
     <div class="card">
-      <h2 style="margin:0 0 8px;">2) Paste Ingredients</h2>
-      <textarea id="ingredients" rows="7" placeholder="Paste ingredients here…"></textarea>
-      <div class="row" style="margin-top:10px;">
-        <button id="checkBtn">Check</button>
-        <button id="clearBtn">Clear</button>
-        <span class="muted right">Tip: crop the photo to only the ingredients panel for better text copy.</span>
-      </div>
-      <div class="hr"></div>
-      <div class="small muted">
-        Ambiguous flags (trigger ⚠️ Maybe unless a direct avoid match exists): <span id="ambList"></span>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2 style="margin:0 0 8px;">3) Results</h2>
-      <div id="results" class="muted">Paste ingredients and tap “Check”.</div>
-    </div>
-
-    <div class="card">
-      <h2 style="margin:0 0 8px;">History</h2>
-      <div class="muted small" style="margin-bottom:8px;">Saved on this device only.</div>
-      <div id="history"></div>
-      <div class="row">
-        <button id="clearHistory">Clear history</button>
-      </div>
-    </div>
-
-    <div class="muted" style="margin: 14px 0 40px;">
-      Note: ingredient screening is a helper. For major diet changes, confirm with your vet / elimination diet plan.
+      <details>
+        <summary>Show the stored sensitivity lists (so the page stays clean)</summary>
+        <div class="small" style="margin-top:10px">
+          These are the High/Moderate items from your reports, used for matching.
+        </div>
+        <pre id="lists" style="white-space:pre-wrap;word-break:break-word;color:var(--muted);margin:10px 0 0 0;"></pre>
+      </details>
     </div>
   </div>
 
 <script>
-/** ========= Config you can customize ========= **/
+/**
+ * Data from your reports (High/Moderate only).
+ * Food/Additives/Environmental/Nutrition/Metals are all included as match targets.
+ *
+ * Coco:
+ * - Food overview 0
+ * - Additives overview 1
+ * - Environmental overview 2
+ * - Nutrition overview 3
+ * - Metals overview 4
+ *
+ * Ollie:
+ * - Food overview 5
+ * - Additives overview 6
+ * - Environmental overview 7
+ * - Nutrition overview 8
+ * - Metals overview 9
+ */
 
-// Ambiguous ingredients that often hide sources (species/ingredient)
-const AMBIGUOUS_FLAGS = [
-  "natural flavor",
-  "natural flavours",
-  "animal digest",
-  "meat meal",
-  "meat by-product",
-  "broth",
-  "fish oil",
-  "poultry fat",
-  "animal fat",
-  "rendered fat",
-  "digest",
-];
+const DOGS = {
+  Coco: {
+    High: [
+      // Food (High)
+      "Cheese - Goat","Chicken Eggs","Chives","Clove","Coconut Milk","Coffee Beans","Groundnut oil",
+      "Linseed (flax)","Marshmallow root","Mushroom - white button","Oat flour","Pasta - white",
+      "Potato flour","Sunflower Spread",
+      // Additives (High)
+      "E 150 b Caustic Sulphite Caramel (brown coloring)","E 220 Sulphur dioxide (preservative)",
+      "E 225 Potassium sulphite (preservative)","E 233 Thiabendazole (preservative/fungicide)",
+      "E 236 Formic acid (preservative)","E 317 Erythorbic acid (antioxidant)",
+      "E 518 Magnesium sulphate (firming agent)","E 620 Glutamic acid (flavour enhancer)",
+      "E 635 Disodium 5'-ribonucleotides (flavour enhancer)","E 905 c Paraffin wax (coating agent)",
+      "E 913 Lanolin (coating agent)","Myrrh",
+      // Environmental (High)
+      "House dust mites","Pine","Polyester","Willow",
+      // Nutrition (Highly outside range)
+      "Copper","Iron","Magnesium","Manganese","Potassium",
+      // Metals (High)
+      "Cobalt","Copper"
+    ],
+    Moderate: [
+      // Food (Moderate)
+      "Cabbage","Ground Yellow Corn","Lamb","Pumpkin Seeds","Sesame Oil",
+      // Additives (Moderate)
+      "Artichoke leaf extract","Astragalus Root","Carotenoids","Chicory Root Extract","E 211 Sodium benzoate (preservative)",
+      "E 212 Potassium benzoate (preservative)","E 252 Potassium nitrate (preservative)","E 320 Butylated hydroxyanisole (BHA) (antioxidant)",
+      "E 410 Locust bean gum (thickener)","E 420 Sorbitol (sweetener)","E 621 Monosodium glutamate (flavour enhancer)",
+      "E 955 Sucralose (sweetener)","E 962 Aspartame-acesulfame salt (sweetener)","Formalin",
+      // Environmental (Moderate)
+      "Aspergillus fumigatus","Ash","Beechwood","Cat dander","Chicken feathers","Dandelion","Dog dander","Dust",
+      "Horse hair","Orchard grass","Plantain","Sheep wool","Straw","Wheat pollen",
+      // Nutrition (Moderately outside range)
+      "Calcium","Cobalt","Lysine","Sodium","Zinc",
+      // Metals (Moderate)
+      "Aluminium","Antimony","Cadmium","Chlorine","Chromium","Gold","Lead","Manganese","Mercury",
+      "Molybdenum","Nickel","Niobium","Palladium","Rubidium","Tin"
+    ]
+  },
 
-// Synonym expansions (grow this over time)
-const SYNONYMS = {
-  chicken: ["chicken meal","chicken fat","chicken by-product","poultry","poultry meal","poultry fat"],
-  turkey: ["turkey meal","turkey fat","poultry"],
-  beef: ["beef meal","beef fat","bovine","tallow"],
-  lamb: ["lamb meal","lamb fat","mutton"],
-  pork: ["porcine","pork meal","pork fat","bacon"],
-  milk: ["whey","casein","lactose","skim milk","milk protein"],
-  egg: ["egg product","dried egg","whole egg"],
-  wheat: ["wheat flour","wheat gluten","durum","semolina"],
-  corn: ["corn meal","corn gluten","maize"],
-  soy: ["soybean","soybean meal","soy protein","soy flour"],
-  fish: ["salmon","whitefish","menhaden","herring","tuna","trout","fish meal"]
+  Ollie: {
+    High: [
+      // Food (High)
+      "Avocado oil","Boar","Buttermilk","Canola Meal","Coconut","Coconut Oil","Crab","Duck Liver","Noodles - wheat",
+      "Papaya","Parmesan","Prawn","Sage","Strawberry","Tapioca","Venison Meal",
+      // Additives (High)
+      "E 141 Copper complexes of chlorophyll (green coloring)","E 150 d Sulphite Ammonia Caramel (brown coloring)",
+      "E 160 e Beta-apo-8'-carotenal (orange pigment)","E 162 Beetroot red (natural red coloring)",
+      "E 218 Methyl p-hydroxybenzoate (preservative)","E 242 Dimethyl dicarbonate (sterilizing agent)",
+      "E 260 Acetic acid (preservative)","E 263 Calcium acetate (acidity regulator)","E 270 Lactic acid (preservative)",
+      "E 335 Sodium tartrate (acidity regulator)","E 472 d Tartaric acid esters of mono- and diglycerides (emulsifier)",
+      "E 473 Sucrose esters of fatty acids (emulsifier)","E 477 Propylene glycol esters of fatty acids (emulsifier)",
+      "E 522 Aluminium potassium sulphate (stabiliser)","E 541 Sodium aluminium phosphate (raising agent)",
+      "E 630 Inosinic acid (flavour enhancer)","E 941 Nitrogen (packing gas)","E 951 Aspartame (sweetener)",
+      "Formic acid","Pepsin","Tartaric acid",
+      // Environmental (High)
+      "Ammonia","Beechwood","Birchwood","Chicken feathers","Dog dander","Dandelion",
+      // Nutrition (Highly outside range)
+      "Copper","Manganese","Phosphorus","Sodium","Zinc",
+      // Metals (High)
+      "Copper","Palladium","Rubidium"
+    ],
+    Moderate: [
+      // Food (Moderate)
+      "Anchovy","Catfish","Cheese - Cottage","Chicken Heart","Condensed milk","Cream","Egg White - Chicken",
+      "Emmer wheat","Farina secalis cerealis","Ginkgo biloba","Greens (Collard)","Lamb Liver","Liver - ox",
+      "Milkweed","Onion","Pepper - green","Pheasant Gizzard","Pigeon","Raisin","Skate","Soy Flour",
+      "Sweet Potato","Tilefish","Winkles",
+      // Additives (Moderate)
+      "E 150 c Ammonia Caramel (brown coloring)","E 1520 Propylene glycol","E 249 Potassium nitrite (curing agent)",
+      "E 284 Boric acid (preservative)","E 312 Dodecyl gallate (antioxidant)","E 334 Tartaric acid (acidity regulator)",
+      "E 353 Metatartaric acid (acidity regulator)","E 354 Calcium tartrate (acidity regulator)",
+      "E 472 e Mono- and diacetyltartaric acid esters of mono- and diglycerides (emulsifier)",
+      "E 476 Polyglycerol polyricinoleate (emulsifier)","E 554 Sodium aluminosilicate (anti-caking agent)",
+      "E 621 Monosodium glutamate (flavour enhancer)","E 634 Calcium 5'-ribonucleotides (flavour enhancer)",
+      "E 902 Candelilla wax (coating agent)","E 903 Carnauba wax (coating agent)","Formalin",
+      // Environmental (Moderate)
+      "Aspergillus fumigatus","Ash","Cat dander","Cladosporium herbarum","Cotton","Dust","Horse hair",
+      "Orchard grass","Pine","Polyester","Sheep wool","Straw","Tree pollen","Wheat pollen","Willow",
+      // Nutrition (Moderately outside range)
+      "Calcium","Iron","Magnesium","Potassium",
+      // Metals (Moderate)
+      "Aluminium","Chromium","Cobalt","Gold","Manganese","Mercury","Molybdenum","Niobium","Tin"
+    ]
+  }
 };
 
-const STORAGE_KEY = "dog_checker_v1";
-
-/** ========= State ========= **/
-let state = loadState();
-
-/** ========= Helpers ========= **/
-function normalize(s) {
+function norm(s){
   return (s || "")
     .toLowerCase()
-    .replace(/[\r\n]+/g, " ")
-    .replace(/[^a-z0-9\s,()\-]/g, " ")
-    .replace(/\s+/g, " ")
+    .replace(/\u00a0/g," ")
+    .replace(/[\(\)\[\]\{\}]/g," ")
+    .replace(/[^\w\s\.\-']/g," ")
+    .replace(/\s+/g," ")
     .trim();
 }
 
-function escapeRegex(s) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+// Build “match keys” so E-numbers match even if label formats differ (e.g. "E260", "E 260")
+function buildMatchers(items){
+  return items.map(item => {
+    const n = norm(item);
 
-function expandTerm(term) {
-  const t = term.toLowerCase().trim();
-  const extras = SYNONYMS[t] || [];
-  return [t, ...extras];
-}
+    // E-number support
+    const em = n.match(/\be\s*([0-9]{3,4})\b/);
+    const eNum = em ? em[1] : null;
 
-function findMatches(text, avoidList) {
-  const matches = new Set();
-  for (const raw of avoidList) {
-    for (const t of expandTerm(raw)) {
-      const re = new RegExp(`(^|\\W)${escapeRegex(t)}(\\W|$)`, "i");
-      if (re.test(text)) matches.add(t);
+    // Use multiple match keys:
+    const keys = new Set();
+    keys.add(n);
+    if(eNum){
+      keys.add(`e ${eNum}`);
+      keys.add(`e${eNum}`);
+      keys.add(`e-${eNum}`);
     }
+
+    // Also add the plain-name part after the E number if present
+    // Example: "E 260 Acetic acid (preservative)" -> "acetic acid"
+    if(eNum){
+      const stripped = n.replace(/\be\s*[0-9]{3,4}\b/g," ").replace(/\s+/g," ").trim();
+      if(stripped.length >= 4) keys.add(stripped);
+    }
+
+    return { label:item, keys:[...keys] };
+  });
+}
+
+const MATCHERS = {
+  Coco: { High: buildMatchers(DOGS.Coco.High), Moderate: buildMatchers(DOGS.Coco.Moderate) },
+  Ollie:{ High: buildMatchers(DOGS.Ollie.High), Moderate: buildMatchers(DOGS.Ollie.Moderate) }
+};
+
+function findMatches(pastedText, dogName){
+  const t = norm(pastedText);
+  const out = { high:[], mod:[] };
+
+  for(const entry of MATCHERS[dogName].High){
+    if(entry.keys.some(k => k && t.includes(k))) out.high.push(entry.label);
   }
-  return [...matches].sort();
-}
-
-function findAmbiguous(text) {
-  const found = [];
-  for (const flag of AMBIGUOUS_FLAGS) {
-    const re = new RegExp(`(^|\\W)${escapeRegex(flag)}(\\W|$)`, "i");
-    if (re.test(text)) found.push(flag);
+  for(const entry of MATCHERS[dogName].Moderate){
+    if(entry.keys.some(k => k && t.includes(k))) out.mod.push(entry.label);
   }
-  return found;
+
+  // de-dupe (just in case multiple keys hit)
+  out.high = [...new Set(out.high)];
+  out.mod  = [...new Set(out.mod)].filter(x => !out.high.includes(x));
+
+  return out;
 }
 
-function parseAvoidList(s) {
-  return (s || "")
-    .split(",")
-    .map(x => x.trim())
-    .filter(Boolean);
-}
-
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) return JSON.parse(raw);
-  return {
-    dogs: [
-      { name: "Ollie", avoid: [] },
-      { name: "Coco", avoid: [] }
-    ],
-    history: []
-  };
-}
-
-/** ========= UI ========= **/
-const dogsDiv = document.getElementById("dogs");
-const resultsDiv = document.getElementById("results");
-const ingredientsEl = document.getElementById("ingredients");
-const ambListEl = document.getElementById("ambList");
-const historyDiv = document.getElementById("history");
-
-ambListEl.textContent = AMBIGUOUS_FLAGS.join(", ");
-
-function renderDogs() {
-  dogsDiv.innerHTML = "";
-  state.dogs.forEach((d, idx) => {
-    const wrap = document.createElement("div");
-    wrap.className = "dog";
-    wrap.innerHTML = `
-      <div class="row">
-        <div class="grow">
-          <div class="muted small" style="margin-bottom:4px;">Dog name</div>
-          <input value="${escapeHtml(d.name)}" data-idx="${idx}" data-field="name" />
-        </div>
-        <button data-idx="${idx}" data-action="remove">Remove</button>
-      </div>
-      <div style="margin-top:10px;">
-        <div class="muted small" style="margin-bottom:4px;">Avoid list (comma-separated)</div>
-        <textarea rows="3" data-idx="${idx}" data-field="avoid">${escapeHtml((d.avoid || []).join(", "))}</textarea>
-        <div class="muted small" style="margin-top:6px;">
-          Example: chicken, beef, wheat, milk
-        </div>
-      </div>
-    `;
-    dogsDiv.appendChild(wrap);
-  });
-
-  // bind inputs
-  dogsDiv.querySelectorAll("input, textarea").forEach(el => {
-    el.addEventListener("change", (e) => {
-      const i = Number(e.target.dataset.idx);
-      const field = e.target.dataset.field;
-      if (field === "name") state.dogs[i].name = e.target.value.trim() || state.dogs[i].name;
-      if (field === "avoid") state.dogs[i].avoid = parseAvoidList(e.target.value);
-      saveState();
-    });
-  });
-
-  dogsDiv.querySelectorAll("button[data-action='remove']").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const i = Number(btn.dataset.idx);
-      state.dogs.splice(i, 1);
-      saveState();
-      renderDogs();
-      renderResults(); // refresh
-    });
-  });
-}
-
-function renderResults() {
-  const normalized = normalize(ingredientsEl.value);
-  if (!normalized) {
-    resultsDiv.className = "muted";
-    resultsDiv.textContent = "Paste ingredients and tap “Check”.";
+function setList(ul, items){
+  ul.innerHTML = "";
+  if(!items.length){
+    const d = document.createElement("div");
+    d.className="empty";
+    d.textContent="None found.";
+    ul.appendChild(d);
     return;
   }
-
-  const ambiguous = findAmbiguous(normalized);
-
-  const blocks = [];
-  if (ambiguous.length) {
-    blocks.push(`
-      <div class="card" style="border-color:#eee; background:#fff;">
-        <strong>Ambiguous ingredients found:</strong> ${escapeHtml(ambiguous.join(", "))}
-        <div class="muted small" style="margin-top:6px;">
-          These can hide sources (species/ingredient), so they trigger “Maybe” unless an avoid match exists.
-        </div>
-      </div>
-    `);
+  for(const it of items){
+    const li = document.createElement("li");
+    li.textContent = it;
+    ul.appendChild(li);
   }
-
-  state.dogs.forEach(d => {
-    const matches = findMatches(normalized, d.avoid || []);
-    let verdict = "SAFE";
-    if (matches.length) verdict = "AVOID";
-    else if (ambiguous.length) verdict = "MAYBE";
-
-    const pill = verdict === "SAFE" ? "✅ SAFE" : verdict === "AVOID" ? "❌ AVOID" : "⚠️ MAYBE";
-    const details = matches.length
-      ? `<div style="margin-top:8px;"><strong>Matched:</strong> ${escapeHtml(matches.join(", "))}</div>`
-      : verdict === "MAYBE"
-        ? `<div class="muted" style="margin-top:8px;">No direct avoid matches, but ambiguous ingredients were detected.</div>`
-        : `<div class="muted" style="margin-top:8px;">No avoid matches found.</div>`;
-
-    blocks.push(`
-      <div class="dog">
-        <div class="row">
-          <strong style="font-size:16px;">${escapeHtml(d.name)}</strong>
-          <span class="pill">${pill}</span>
-        </div>
-        ${details}
-      </div>
-    `);
-  });
-
-  resultsDiv.className = "";
-  resultsDiv.innerHTML = blocks.join("");
-
-  // Save to history
-  state.history.unshift({
-    ts: Date.now(),
-    ingredients: ingredientsEl.value.slice(0, 2000),
-    resultsHtml: resultsDiv.innerHTML
-  });
-  state.history = state.history.slice(0, 25); // keep last 25
-  saveState();
-  renderHistory();
 }
 
-function renderHistory() {
-  historyDiv.innerHTML = "";
-  if (!state.history.length) {
-    historyDiv.innerHTML = `<div class="muted">No history yet.</div>`;
-    return;
-  }
-
-  state.history.forEach((h, idx) => {
-    const dt = new Date(h.ts);
-    const item = document.createElement("div");
-    item.className = "dog";
-    item.innerHTML = `
-      <div class="row">
-        <strong>${dt.toLocaleString()}</strong>
-        <span class="muted small right linkish" data-idx="${idx}" data-action="restore">Restore</span>
-      </div>
-      <div class="muted small" style="margin-top:8px; white-space: pre-wrap;">${escapeHtml(h.ingredients)}</div>
-    `;
-    historyDiv.appendChild(item);
-  });
-
-  historyDiv.querySelectorAll("[data-action='restore']").forEach(el => {
-    el.addEventListener("click", () => {
-      const i = Number(el.dataset.idx);
-      ingredientsEl.value = state.history[i].ingredients;
-      renderResults();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  });
+function summarize(highCount, modCount){
+  if(highCount>0) return `AVOID: ${highCount} found`;
+  if(modCount>0) return `CAUTION: ${modCount} found`;
+  return `SAFE: no matches`;
 }
 
-function escapeHtml(str) {
-  return (str || "").replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
+function run(){
+  const txt = document.getElementById("ingredients").value || "";
+  const status = document.getElementById("status");
+  status.textContent = "Checking…";
+
+  const coco = findMatches(txt, "Coco");
+  const ollie = findMatches(txt, "Ollie");
+
+  setList(document.getElementById("cocoHigh"), coco.high);
+  setList(document.getElementById("cocoMod"), coco.mod);
+  setList(document.getElementById("ollieHigh"), ollie.high);
+  setList(document.getElementById("ollieMod"), ollie.mod);
+
+  document.getElementById("cocoSummary").textContent = summarize(coco.high.length, coco.mod.length);
+  document.getElementById("ollieSummary").textContent = summarize(ollie.high.length, ollie.mod.length);
+
+  status.textContent = "Done";
 }
 
-/** ========= Events ========= **/
-document.getElementById("addDog").addEventListener("click", () => {
-  state.dogs.push({ name: `Dog ${state.dogs.length + 1}`, avoid: [] });
-  saveState();
-  renderDogs();
+document.getElementById("run").addEventListener("click", run);
+document.getElementById("clear").addEventListener("click", () => {
+  document.getElementById("ingredients").value = "";
+  document.getElementById("status").textContent = "Waiting…";
+  ["cocoHigh","cocoMod","ollieHigh","ollieMod"].forEach(id => document.getElementById(id).innerHTML="");
+  document.getElementById("cocoSummary").textContent="—";
+  document.getElementById("ollieSummary").textContent="—";
+});
+document.getElementById("demo").addEventListener("click", () => {
+  document.getElementById("ingredients").value =
+`Ingredients: chicken, sweet potato, coconut oil, glycerin, citric acid, natural flavors, paprika extract, lactic acid, sodium benzoate, rosemary extract.`;
+  run();
 });
 
-document.getElementById("checkBtn").addEventListener("click", renderResults);
-
-document.getElementById("clearBtn").addEventListener("click", () => {
-  ingredientsEl.value = "";
-  resultsDiv.className = "muted";
-  resultsDiv.textContent = "Paste ingredients and tap “Check”.";
-});
-
-document.getElementById("clearHistory").addEventListener("click", () => {
-  state.history = [];
-  saveState();
-  renderHistory();
-});
-
-/** ========= Init ========= **/
-renderDogs();
-renderHistory();
+// Populate the hidden list view (kept collapsed to save space)
+document.getElementById("lists").textContent =
+JSON.stringify(DOGS, null, 2);
 </script>
 </body>
 </html>
