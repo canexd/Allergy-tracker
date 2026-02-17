@@ -2,221 +2,322 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Coolie Nutrition System</title>
+<title>Coolie Allergy & Nutrition System</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(180deg,#0c1626,#0f1f38);
-    color: #fff;
+body{
+    font-family:Arial;
+    background:linear-gradient(180deg,#0c1626,#0f1f38);
+    color:#fff;
     margin:0;
     padding:20px;
 }
-h1 { margin-bottom:10px; }
-.section { margin-top:25px; }
-button {
-    background:#2e6df6;
+h1{margin-bottom:10px;}
+.tabs button{
+    background:#1f2c48;
     color:#fff;
     border:none;
-    padding:10px 16px;
+    padding:8px 14px;
+    margin-right:6px;
     border-radius:6px;
     cursor:pointer;
-    margin-top:8px;
 }
-button.secondary {
-    background:#2c3445;
+.tabs button.active{
+    background:#2e6df6;
 }
-input, select {
-    padding:8px;
-    margin-top:6px;
-    border-radius:6px;
-    border:none;
-    width:100%;
-}
-.card {
+.section{display:none;margin-top:20px;}
+.card{
     background:#15233c;
     padding:15px;
     border-radius:10px;
     margin-top:10px;
 }
-.red { color:#ff5e5e; }
-.yellow { color:#ffd65e; }
-.green { color:#5eff9b; }
-.small { font-size:14px; opacity:0.8; }
-hr { border:1px solid #1f2c48; margin:20px 0; }
+input,select,textarea{
+    width:100%;
+    padding:8px;
+    border-radius:6px;
+    border:none;
+    margin-top:6px;
+}
+button{
+    padding:8px 14px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    margin-top:8px;
+    background:#2e6df6;
+    color:#fff;
+}
+button.secondary{
+    background:#2c3445;
+}
+.red{color:#ff5e5e;}
+.yellow{color:#ffd65e;}
+.small{font-size:13px;opacity:.8;}
+pre{white-space:pre-wrap;}
 </style>
 </head>
 <body>
 
-<h1>Coolie Meal Planner</h1>
+<h1>Coolie Allergy & Nutrition System</h1>
 
-<div class="section card">
-<h3>Dog Weights (lbs)</h3>
-<label>Coco Weight</label>
+<div class="tabs">
+<button onclick="showTab('scanner')" class="active" id="tab-scanner">Scanner</button>
+<button onclick="showTab('master')" id="tab-master">Master List</button>
+<button onclick="showTab('shared')" id="tab-shared">Shared Safe</button>
+<button onclick="showTab('meal')" id="tab-meal">Meal Builder</button>
+</div>
+
+<!-- SCANNER -->
+<div id="scanner" class="section" style="display:block;">
+<div class="card">
+<h3>Ingredient Scanner</h3>
+<textarea id="scanInput" rows="5" placeholder="Paste ingredients here..."></textarea>
+<button onclick="runScan()">Scan</button>
+<button class="secondary" onclick="demoScan()">Demo</button>
+<div id="scanResults"></div>
+</div>
+</div>
+
+<!-- MASTER -->
+<div id="master" class="section">
+<div class="card">
+<h3>Master Reaction List</h3>
+<input type="text" id="masterSearch" placeholder="Search..." oninput="renderMaster()">
+<div id="masterResults"></div>
+</div>
+</div>
+
+<!-- SHARED SAFE -->
+<div id="shared" class="section">
+<div class="card">
+<h3>Shared Safe Ingredients</h3>
+<input type="text" id="sharedSearch" placeholder="Search safe..." oninput="renderShared()">
+<div id="sharedResults"></div>
+</div>
+</div>
+
+<!-- MEAL BUILDER -->
+<div id="meal" class="section">
+<div class="card">
+<h3>Meal Builder</h3>
+
+<label>Coco Weight (lbs)</label>
 <input type="number" id="cocoWeight" value="55">
 
-<label>Ollie Weight</label>
+<label>Ollie Weight (lbs)</label>
 <input type="number" id="ollieWeight" value="65">
 
-<label>Activity Level</label>
+<label>Activity</label>
 <select id="activity">
 <option value="1.2">Low</option>
 <option value="1.4" selected>Normal</option>
 <option value="1.6">Active</option>
 </select>
 
-<label>Meals per Day</label>
+<label>Meals Per Day</label>
 <select id="mealsPerDay">
 <option>1</option>
 <option selected>2</option>
 <option>3</option>
 </select>
 
-<label>Batch Days (1–7)</label>
+<label>Batch Days</label>
 <input type="range" id="batchDays" min="1" max="7" value="7" oninput="updateBatchLabel()">
 <p class="small" id="batchLabel">7 days</p>
 
 <button onclick="generateMeal()">Generate Meal</button>
 <button class="secondary" onclick="saveMeal()">Save Meal</button>
-<button class="secondary" onclick="exportGrocery()">Export Grocery List</button>
-</div>
+<button class="secondary" onclick="exportGrocery()">Export Grocery</button>
 
-<div id="mealOutput" class="section"></div>
+<div id="mealOutput"></div>
+</div>
+</div>
 
 <script>
 
-// SAFE INGREDIENT POOL (AUTO FILTERED FROM BOTH DOGS DATA)
-// Only LOW or unlisted ingredients
+/* =======================
+ALLERGY DATABASE
+(High + Moderate only)
+======================= */
 
-const safeProteins = [
-"Chicken","Turkey","Salmon","Cod","Whitefish","Sardine","Bison","Goat","Quail","Pork"
+const reactions = [
+{ingredient:"Coconut",dog:"Ollie",level:"High"},
+{ingredient:"Duck Liver",dog:"Ollie",level:"High"},
+{ingredient:"Venison Meal",dog:"Ollie",level:"High"},
+{ingredient:"Avocado oil",dog:"Ollie",level:"High"},
+{ingredient:"Beef",dog:"Coco",level:"Moderate"},
+{ingredient:"Sweet Potato",dog:"Ollie",level:"Moderate"},
+{ingredient:"Oats",dog:"Coco",level:"High"},
+{ingredient:"Papaya",dog:"Ollie",level:"High"},
+{ingredient:"Parmesan",dog:"Ollie",level:"High"},
+{ingredient:"Sage",dog:"Ollie",level:"High"},
+{ingredient:"Strawberry",dog:"Ollie",level:"High"}
 ];
 
-const safeCarbs = [
-"White Rice","Brown Rice","Quinoa","Barley","Oats","Pumpkin"
-];
+/* =======================
+SAFE POOL
+======================= */
 
-const safeVeg = [
-"Carrots","Zucchini","Green Beans","Spinach","Broccoli","Butternut Squash","Cabbage"
-];
+const proteinPool = ["Chicken","Turkey","Salmon","Cod","Whitefish","Sardine","Bison","Goat","Quail","Pork"];
+const carbPool = ["White Rice","Brown Rice","Quinoa","Barley","Pumpkin"];
+const vegPool = ["Carrots","Zucchini","Green Beans","Spinach","Broccoli","Butternut Squash"];
+const fatPool = ["Salmon Oil","Sardine Oil","Olive Oil","Flaxseed"];
 
-const safeFats = [
-"Salmon Oil","Sardine Oil","Olive Oil","Flaxseed"
-];
+function isUnsafe(ingredient){
+return reactions.some(r =>
+r.ingredient.toLowerCase()===ingredient.toLowerCase()
+);
+}
 
-let lastGrocery = "";
+/* =======================
+TAB CONTROL
+======================= */
+
+function showTab(id){
+document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+document.getElementById(id).style.display="block";
+document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+document.getElementById("tab-"+id).classList.add("active");
+}
+
+/* =======================
+SCANNER
+======================= */
+
+function runScan(){
+let input=document.getElementById("scanInput").value.toLowerCase();
+let results="";
+reactions.forEach(r=>{
+if(input.includes(r.ingredient.toLowerCase())){
+results+=`<p class="${r.level==="High"?"red":"yellow"}">
+${r.ingredient} — ${r.dog} (${r.level})
+</p>`;
+}
+});
+if(results==="") results="<p>No reactions found.</p>";
+document.getElementById("scanResults").innerHTML=results;
+}
+
+function demoScan(){
+document.getElementById("scanInput").value="Chicken, Coconut, Beef, Sweet Potato";
+runScan();
+}
+
+/* =======================
+MASTER LIST
+======================= */
+
+function renderMaster(){
+let search=document.getElementById("masterSearch").value.toLowerCase();
+let html="";
+reactions.forEach(r=>{
+if(r.ingredient.toLowerCase().includes(search)){
+html+=`<p class="${r.level==="High"?"red":"yellow"}">
+${r.ingredient} — ${r.dog} (${r.level})
+</p>`;
+}
+});
+document.getElementById("masterResults").innerHTML=html;
+}
+renderMaster();
+
+/* =======================
+SHARED SAFE
+======================= */
+
+function renderShared(){
+let search=document.getElementById("sharedSearch").value.toLowerCase();
+let combined=[...proteinPool,...carbPool,...vegPool,...fatPool];
+let html="";
+combined.forEach(i=>{
+if(!isUnsafe(i) && i.toLowerCase().includes(search)){
+html+=`<p>${i}</p>`;
+}
+});
+document.getElementById("sharedResults").innerHTML=html;
+}
+renderShared();
+
+/* =======================
+MEAL BUILDER
+======================= */
 
 function updateBatchLabel(){
-    document.getElementById("batchLabel").innerText =
-        document.getElementById("batchDays").value + " days";
+document.getElementById("batchLabel").innerText=
+document.getElementById("batchDays").value+" days";
 }
 
-function calculateCalories(weightLbs, activityMultiplier){
-    let weightKg = weightLbs * 0.4536;
-    let RER = 70 * Math.pow(weightKg,0.75);
-    return RER * activityMultiplier;
+function calculateCalories(weight,activity){
+let kg=weight*0.4536;
+return 70*Math.pow(kg,.75)*activity;
 }
 
-function randomItem(arr){
-    return arr[Math.floor(Math.random()*arr.length)];
+let lastGrocery="";
+
+function randomSafe(arr){
+let safe=arr.filter(i=>!isUnsafe(i));
+return safe[Math.floor(Math.random()*safe.length)];
 }
 
 function generateMeal(){
 
-    let cocoWeight = parseFloat(document.getElementById("cocoWeight").value);
-    let ollieWeight = parseFloat(document.getElementById("ollieWeight").value);
-    let activity = parseFloat(document.getElementById("activity").value);
-    let mealsPerDay = parseInt(document.getElementById("mealsPerDay").value);
-    let batchDays = parseInt(document.getElementById("batchDays").value);
+let coco=parseFloat(document.getElementById("cocoWeight").value);
+let ollie=parseFloat(document.getElementById("ollieWeight").value);
+let activity=parseFloat(document.getElementById("activity").value);
+let meals=parseInt(document.getElementById("mealsPerDay").value);
+let days=parseInt(document.getElementById("batchDays").value);
 
-    let cocoCal = calculateCalories(cocoWeight,activity);
-    let ollieCal = calculateCalories(ollieWeight,activity);
+let totalCalories=calculateCalories(coco,activity)+calculateCalories(ollie,activity);
 
-    let totalDailyCalories = cocoCal + ollieCal;
+let protein=randomSafe(proteinPool);
+let carb=randomSafe(carbPool);
+let veg1=randomSafe(vegPool);
+let veg2=randomSafe(vegPool);
+let fat=randomSafe(fatPool);
 
-    // HOME COOK STYLE RATIOS
-    let proteinCals = totalDailyCalories * 0.5;
-    let carbCals = totalDailyCalories * 0.25;
-    let vegCals = totalDailyCalories * 0.2;
-    let fatCals = totalDailyCalories * 0.05;
+let dailyOz=(totalCalories/30);
+let perMealOz=dailyOz/meals;
+let batchLbs=(dailyOz*days)/16;
 
-    // Calorie density approximations
-    let proteinWeight = proteinCals / 1.2;
-    let carbWeight = carbCals / 1.5;
-    let vegWeight = vegCals / 0.5;
-    let fatWeight = fatCals / 9;
+lastGrocery=`${days} Day Grocery List
 
-    let totalDailyOz = (proteinWeight + carbWeight + vegWeight + fatWeight)/28.35;
-
-    let perMealOz = totalDailyOz / mealsPerDay;
-
-    let batchTotalOz = totalDailyOz * batchDays;
-    let batchTotalLbs = batchTotalOz / 16;
-
-    let protein = randomItem(safeProteins);
-    let carb = randomItem(safeCarbs);
-    let veg1 = randomItem(safeVeg);
-    let veg2 = randomItem(safeVeg);
-    let fat = randomItem(safeFats);
-
-    lastGrocery =
-`Batch for ${batchDays} Days
-
-Protein:
-${(proteinWeight*batchDays/453.6).toFixed(2)} lbs ${protein}
-
-Carb:
-${(carbWeight*batchDays/453.6).toFixed(2)} lbs ${carb}
-
-Vegetables:
-${(vegWeight*batchDays/453.6/2).toFixed(2)} lbs ${veg1}
-${(vegWeight*batchDays/453.6/2).toFixed(2)} lbs ${veg2}
-
-Fat:
-${(fatWeight*batchDays/28.35).toFixed(2)} oz ${fat}
+Protein: ${protein}
+Carb: ${carb}
+Vegetables: ${veg1}, ${veg2}
+Fat: ${fat}
+Total Batch: ${batchLbs.toFixed(2)} lbs
 `;
 
-    document.getElementById("mealOutput").innerHTML = `
+document.getElementById("mealOutput").innerHTML=`
 <div class="card">
-<h3>Generated Home Cook Meal</h3>
-
+<h4>Meal Plan</h4>
 <p><b>Protein:</b> ${protein}</p>
 <p><b>Carb:</b> ${carb}</p>
-<p><b>Vegetables:</b> ${veg1} + ${veg2}</p>
-<p><b>Fat Booster:</b> ${fat}</p>
-
+<p><b>Veg:</b> ${veg1} + ${veg2}</p>
+<p><b>Fat:</b> ${fat}</p>
 <hr>
-
-<p><b>Total Daily Food:</b> ${totalDailyOz.toFixed(2)} oz (~${(totalDailyOz/4).toFixed(2)} cups)</p>
+<p><b>Total Daily:</b> ${dailyOz.toFixed(2)} oz (~${(dailyOz/4).toFixed(2)} cups)</p>
 <p><b>Per Meal:</b> ${perMealOz.toFixed(2)} oz (~${(perMealOz/4).toFixed(2)} cups)</p>
-
-<hr>
-
-<p><b>Batch Cook (${batchDays} days)</b></p>
-<p>Total Needed: ${batchTotalLbs.toFixed(2)} lbs</p>
-
-<hr>
-
-<h4>Grocery List</h4>
+<p><b>Batch (${days} days):</b> ${batchLbs.toFixed(2)} lbs</p>
 <pre>${lastGrocery}</pre>
-
 </div>
 `;
 }
 
 function saveMeal(){
-    if(lastGrocery){
-        localStorage.setItem("savedMeal",lastGrocery);
-        alert("Meal Saved");
-    }
+if(lastGrocery){
+localStorage.setItem("savedMeal",lastGrocery);
+alert("Meal Saved");
+}
 }
 
 function exportGrocery(){
-    if(!lastGrocery) return;
-    let blob = new Blob([lastGrocery], { type: "text/plain" });
-    let link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "grocery_list.txt";
-    link.click();
+if(!lastGrocery)return;
+let blob=new Blob([lastGrocery],{type:"text/plain"});
+let link=document.createElement("a");
+link.href=URL.createObjectURL(blob);
+link.download="grocery_list.txt";
+link.click();
 }
 
 </script>
