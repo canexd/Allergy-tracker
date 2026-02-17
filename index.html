@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dog Ingredient Checker</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background:#fafafa; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 16px; }
+    h1 { margin: 8px 0 6px; }
+    p { margin: 0 0 12px; opacity: .8; }
+    .card { background: #fff; border: 1px solid #e6e6e6; border-radius: 14px; padding: 14px; margin: 12px 0; box-shadow: 0 1px 0 rgba(0,0,0,.03); }
+    textarea, input { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 12px; border: 1px solid #cfcfcf; font-size: 14px; }
+    button { padding: 10px 12px; border-radius: 12px; border: 1px solid #cfcfcf; background: #fff; cursor: pointer; font-weight: 600; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .row { display:flex; gap:10px; flex-wrap: wrap; align-items: center; }
+    .grow { flex:1; min-width: 220px; }
+    .pill { padding: 6px 10px; border-radius: 999px; border: 1px solid #ddd; font-weight: 800; }
+    .muted { opacity: .75; font-size: 12px; }
+    .dog { border: 1px solid #eee; border-radius: 14px; padding: 12px; margin: 10px 0; }
+    .hr { height: 1px; background: #eee; margin: 10px 0; }
+    .small { font-size: 13px; }
+    .right { margin-left:auto; }
+    .linkish { text-decoration: underline; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Dog Ingredient Checker</h1>
+    <p>Paste ingredients (copied from a label photo) → get ✅ Safe / ❌ Avoid / ⚠️ Maybe per dog.</p>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px;">1) Dogs & Avoid Lists</h2>
+      <div id="dogs"></div>
+      <div class="row">
+        <button id="addDog">+ Add dog</button>
+        <span class="muted">Avoid list is comma-separated (you can paste and add commas quickly).</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px;">2) Paste Ingredients</h2>
+      <textarea id="ingredients" rows="7" placeholder="Paste ingredients here…"></textarea>
+      <div class="row" style="margin-top:10px;">
+        <button id="checkBtn">Check</button>
+        <button id="clearBtn">Clear</button>
+        <span class="muted right">Tip: crop the photo to only the ingredients panel for better text copy.</span>
+      </div>
+      <div class="hr"></div>
+      <div class="small muted">
+        Ambiguous flags (trigger ⚠️ Maybe unless a direct avoid match exists): <span id="ambList"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px;">3) Results</h2>
+      <div id="results" class="muted">Paste ingredients and tap “Check”.</div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px;">History</h2>
+      <div class="muted small" style="margin-bottom:8px;">Saved on this device only.</div>
+      <div id="history"></div>
+      <div class="row">
+        <button id="clearHistory">Clear history</button>
+      </div>
+    </div>
+
+    <div class="muted" style="margin: 14px 0 40px;">
+      Note: ingredient screening is a helper. For major diet changes, confirm with your vet / elimination diet plan.
+    </div>
+  </div>
+
+<script>
+/** ========= Config you can customize ========= **/
+
+// Ambiguous ingredients that often hide sources (species/ingredient)
+const AMBIGUOUS_FLAGS = [
+  "natural flavor",
+  "natural flavours",
+  "animal digest",
+  "meat meal",
+  "meat by-product",
+  "broth",
+  "fish oil",
+  "poultry fat",
+  "animal fat",
+  "rendered fat",
+  "digest",
+];
+
+// Synonym expansions (grow this over time)
+const SYNONYMS = {
+  chicken: ["chicken meal","chicken fat","chicken by-product","poultry","poultry meal","poultry fat"],
+  turkey: ["turkey meal","turkey fat","poultry"],
+  beef: ["beef meal","beef fat","bovine","tallow"],
+  lamb: ["lamb meal","lamb fat","mutton"],
+  pork: ["porcine","pork meal","pork fat","bacon"],
+  milk: ["whey","casein","lactose","skim milk","milk protein"],
+  egg: ["egg product","dried egg","whole egg"],
+  wheat: ["wheat flour","wheat gluten","durum","semolina"],
+  corn: ["corn meal","corn gluten","maize"],
+  soy: ["soybean","soybean meal","soy protein","soy flour"],
+  fish: ["salmon","whitefish","menhaden","herring","tuna","trout","fish meal"]
+};
+
+const STORAGE_KEY = "dog_checker_v1";
+
+/** ========= State ========= **/
+let state = loadState();
+
+/** ========= Helpers ========= **/
+function normalize(s) {
+  return (s || "")
+    .toLowerCase()
+    .replace(/[\r\n]+/g, " ")
+    .replace(/[^a-z0-9\s,()\-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function expandTerm(term) {
+  const t = term.toLowerCase().trim();
+  const extras = SYNONYMS[t] || [];
+  return [t, ...extras];
+}
+
+function findMatches(text, avoidList) {
+  const matches = new Set();
+  for (const raw of avoidList) {
+    for (const t of expandTerm(raw)) {
+      const re = new RegExp(`(^|\\W)${escapeRegex(t)}(\\W|$)`, "i");
+      if (re.test(text)) matches.add(t);
+    }
+  }
+  return [...matches].sort();
+}
+
+function findAmbiguous(text) {
+  const found = [];
+  for (const flag of AMBIGUOUS_FLAGS) {
+    const re = new RegExp(`(^|\\W)${escapeRegex(flag)}(\\W|$)`, "i");
+    if (re.test(text)) found.push(flag);
+  }
+  return found;
+}
+
+function parseAvoidList(s) {
+  return (s || "")
+    .split(",")
+    .map(x => x.trim())
+    .filter(Boolean);
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) return JSON.parse(raw);
+  return {
+    dogs: [
+      { name: "Ollie", avoid: [] },
+      { name: "Coco", avoid: [] }
+    ],
+    history: []
+  };
+}
+
+/** ========= UI ========= **/
+const dogsDiv = document.getElementById("dogs");
+const resultsDiv = document.getElementById("results");
+const ingredientsEl = document.getElementById("ingredients");
+const ambListEl = document.getElementById("ambList");
+const historyDiv = document.getElementById("history");
+
+ambListEl.textContent = AMBIGUOUS_FLAGS.join(", ");
+
+function renderDogs() {
+  dogsDiv.innerHTML = "";
+  state.dogs.forEach((d, idx) => {
+    const wrap = document.createElement("div");
+    wrap.className = "dog";
+    wrap.innerHTML = `
+      <div class="row">
+        <div class="grow">
+          <div class="muted small" style="margin-bottom:4px;">Dog name</div>
+          <input value="${escapeHtml(d.name)}" data-idx="${idx}" data-field="name" />
+        </div>
+        <button data-idx="${idx}" data-action="remove">Remove</button>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="muted small" style="margin-bottom:4px;">Avoid list (comma-separated)</div>
+        <textarea rows="3" data-idx="${idx}" data-field="avoid">${escapeHtml((d.avoid || []).join(", "))}</textarea>
+        <div class="muted small" style="margin-top:6px;">
+          Example: chicken, beef, wheat, milk
+        </div>
+      </div>
+    `;
+    dogsDiv.appendChild(wrap);
+  });
+
+  // bind inputs
+  dogsDiv.querySelectorAll("input, textarea").forEach(el => {
+    el.addEventListener("change", (e) => {
+      const i = Number(e.target.dataset.idx);
+      const field = e.target.dataset.field;
+      if (field === "name") state.dogs[i].name = e.target.value.trim() || state.dogs[i].name;
+      if (field === "avoid") state.dogs[i].avoid = parseAvoidList(e.target.value);
+      saveState();
+    });
+  });
+
+  dogsDiv.querySelectorAll("button[data-action='remove']").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const i = Number(btn.dataset.idx);
+      state.dogs.splice(i, 1);
+      saveState();
+      renderDogs();
+      renderResults(); // refresh
+    });
+  });
+}
+
+function renderResults() {
+  const normalized = normalize(ingredientsEl.value);
+  if (!normalized) {
+    resultsDiv.className = "muted";
+    resultsDiv.textContent = "Paste ingredients and tap “Check”.";
+    return;
+  }
+
+  const ambiguous = findAmbiguous(normalized);
+
+  const blocks = [];
+  if (ambiguous.length) {
+    blocks.push(`
+      <div class="card" style="border-color:#eee; background:#fff;">
+        <strong>Ambiguous ingredients found:</strong> ${escapeHtml(ambiguous.join(", "))}
+        <div class="muted small" style="margin-top:6px;">
+          These can hide sources (species/ingredient), so they trigger “Maybe” unless an avoid match exists.
+        </div>
+      </div>
+    `);
+  }
+
+  state.dogs.forEach(d => {
+    const matches = findMatches(normalized, d.avoid || []);
+    let verdict = "SAFE";
+    if (matches.length) verdict = "AVOID";
+    else if (ambiguous.length) verdict = "MAYBE";
+
+    const pill = verdict === "SAFE" ? "✅ SAFE" : verdict === "AVOID" ? "❌ AVOID" : "⚠️ MAYBE";
+    const details = matches.length
+      ? `<div style="margin-top:8px;"><strong>Matched:</strong> ${escapeHtml(matches.join(", "))}</div>`
+      : verdict === "MAYBE"
+        ? `<div class="muted" style="margin-top:8px;">No direct avoid matches, but ambiguous ingredients were detected.</div>`
+        : `<div class="muted" style="margin-top:8px;">No avoid matches found.</div>`;
+
+    blocks.push(`
+      <div class="dog">
+        <div class="row">
+          <strong style="font-size:16px;">${escapeHtml(d.name)}</strong>
+          <span class="pill">${pill}</span>
+        </div>
+        ${details}
+      </div>
+    `);
+  });
+
+  resultsDiv.className = "";
+  resultsDiv.innerHTML = blocks.join("");
+
+  // Save to history
+  state.history.unshift({
+    ts: Date.now(),
+    ingredients: ingredientsEl.value.slice(0, 2000),
+    resultsHtml: resultsDiv.innerHTML
+  });
+  state.history = state.history.slice(0, 25); // keep last 25
+  saveState();
+  renderHistory();
+}
+
+function renderHistory() {
+  historyDiv.innerHTML = "";
+  if (!state.history.length) {
+    historyDiv.innerHTML = `<div class="muted">No history yet.</div>`;
+    return;
+  }
+
+  state.history.forEach((h, idx) => {
+    const dt = new Date(h.ts);
+    const item = document.createElement("div");
+    item.className = "dog";
+    item.innerHTML = `
+      <div class="row">
+        <strong>${dt.toLocaleString()}</strong>
+        <span class="muted small right linkish" data-idx="${idx}" data-action="restore">Restore</span>
+      </div>
+      <div class="muted small" style="margin-top:8px; white-space: pre-wrap;">${escapeHtml(h.ingredients)}</div>
+    `;
+    historyDiv.appendChild(item);
+  });
+
+  historyDiv.querySelectorAll("[data-action='restore']").forEach(el => {
+    el.addEventListener("click", () => {
+      const i = Number(el.dataset.idx);
+      ingredientsEl.value = state.history[i].ingredients;
+      renderResults();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+}
+
+function escapeHtml(str) {
+  return (str || "").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+/** ========= Events ========= **/
+document.getElementById("addDog").addEventListener("click", () => {
+  state.dogs.push({ name: `Dog ${state.dogs.length + 1}`, avoid: [] });
+  saveState();
+  renderDogs();
+});
+
+document.getElementById("checkBtn").addEventListener("click", renderResults);
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  ingredientsEl.value = "";
+  resultsDiv.className = "muted";
+  resultsDiv.textContent = "Paste ingredients and tap “Check”.";
+});
+
+document.getElementById("clearHistory").addEventListener("click", () => {
+  state.history = [];
+  saveState();
+  renderHistory();
+});
+
+/** ========= Init ========= **/
+renderDogs();
+renderHistory();
+</script>
+</body>
+</html>
