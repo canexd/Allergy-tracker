@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Coco & Ollie Food System</title>
 
 <style>
@@ -36,7 +36,7 @@
     padding:16px;
     border-radius:16px;
     margin:0 auto 18px;
-    max-width:720px;
+    max-width:860px;
     box-shadow:0 10px 30px rgba(0,0,0,.25);
   }
   h2{margin:0 0 10px}
@@ -51,12 +51,11 @@
     box-sizing:border-box;
     font-size:16px;
   }
-  textarea{min-height:92px; resize:vertical}
+  textarea{min-height:110px; resize:vertical}
 
-  .row{
-    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-  }
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
   .row > * {flex:1}
+
   .pill{
     display:inline-block;
     padding:4px 10px;
@@ -64,78 +63,150 @@
     font-size:12px;
     font-weight:800;
     letter-spacing:.2px;
+    margin-right:6px;
+    margin-top:6px;
   }
   .pill-high{background:rgba(255,92,92,.18); color:#ff7a7a; border:1px solid rgba(255,92,92,.35)}
   .pill-mod{background:rgba(255,196,92,.15); color:#ffd36a; border:1px solid rgba(255,196,92,.35)}
   .pill-safe{background:rgba(76,255,136,.15); color:#6dff9b; border:1px solid rgba(76,255,136,.35)}
+  .pill-caution{background:rgba(125,200,255,.12); color:#a9d6ff; border:1px solid rgba(125,200,255,.28)}
 
   .result{
     padding:10px 12px;
     border-radius:12px;
-    margin-top:8px;
+    margin-top:10px;
     background:#122035;
     border:1px solid rgba(255,255,255,.06);
     line-height:1.35;
   }
   .r-safe{color:#6dff9b}
   .r-bad{color:#ff7a7a}
-  .subtle{opacity:.85; font-size:13px}
+  .r-caution{color:#a9d6ff}
+  .subtle{opacity:.88; font-size:13px}
   .divider{height:1px;background:rgba(255,255,255,.08);margin:12px 0}
+  .twoCol{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px;
+  }
+  @media (max-width:720px){
+    .twoCol{grid-template-columns:1fr}
+  }
+  details{
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;
+    padding:10px 12px;
+    background:#111f33;
+    margin-top:10px;
+  }
+  summary{cursor:pointer;font-weight:700}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
 </style>
 </head>
-<body>
 
+<body>
 <h1>Coco & Ollie Food System</h1>
 
 <div class="tabs">
   <button onclick="showTab('scanner')" id="tab-scanner" class="active">Scanner</button>
   <button onclick="showTab('meal')" id="tab-meal">Meal Planner</button>
-  <button onclick="showTab('shared')" id="tab-shared">Shared Safe</button>
+  <button onclick="showTab('lists')" id="tab-lists">Lists</button>
 </div>
 
+<!-- SCANNER -->
 <div id="scanner" class="card">
   <h2>Ingredient Scanner</h2>
-  <div class="subtle">Paste ingredients (comma or line separated). Results will show which dog(s) react + severity.</div>
-  <textarea id="scanInput" placeholder="Example: chicken, coconut oil, pumpkin puree"></textarea>
+  <div class="subtle">
+    Paste ingredients (comma or line separated). This scanner is smart about plurals and parenthesis notes from iPhone/AI text extraction.
+    It will also show <b>which dog</b> and <b>severity</b>.
+  </div>
+
+  <textarea id="scanInput" placeholder="Example:
+Ingredients: apples, calcium ascorbate, ascorbic acid, calcium carbonate (to maintain freshness and color)
+Chicken, beef, yogurt, carrots, rice"></textarea>
+
+  <div class="twoCol">
+    <div>
+      <label>Scan Mode</label>
+      <select id="scanMode">
+        <option value="food" selected>Food</option>
+        <option value="additives">Additives</option>
+      </select>
+    </div>
+    <div>
+      <label>Matching Mode</label>
+      <select id="matchMode">
+        <option value="smart" selected>Smart (recommended)</option>
+        <option value="strict">Strict (exact phrases)</option>
+      </select>
+    </div>
+  </div>
+
   <div class="row">
     <button onclick="runDemo()">Demo</button>
     <button onclick="scanIngredients()">Scan</button>
   </div>
+
   <div id="scanResults"></div>
+
+  <details>
+    <summary>Tips for photo → text (iPhone / AI)</summary>
+    <div class="subtle" style="margin-top:8px; line-height:1.45">
+      <b>Best iPhone method:</b> Take a photo, open it, tap the <b>Live Text</b> icon, select the ingredients text, copy, paste here.<br><br>
+      <b>Parenthesis notes are safe to ignore:</b> Example:
+      <span class="mono">calcium carbonate (to maintain freshness and color)</span> → this app automatically strips the parenthesis note and still matches <span class="mono">calcium carbonate</span>.<br><br>
+      <b>Plural fix:</b> <span class="mono">carrots</span> will match <span class="mono">carrot</span>.<br>
+      <b>Keyword caution:</b> typing <span class="mono">rice</span> shows a CAUTION breakdown for <span class="mono">rice (brown)</span> vs <span class="mono">rice (white)</span> if those exist in your lists.
+    </div>
+  </details>
 </div>
 
+<!-- MEAL PLANNER -->
 <div id="meal" class="card" style="display:none">
   <h2>Meal Planner</h2>
   <div class="subtle">
-    This planner only uses foods marked as <b>No Reactivity</b> for both dogs.
-    Output shows <b>lbs + oz</b> (and cups).
+    This generator excludes <b>all Moderate + High</b> foods for either dog. Output is <b>lbs + oz + cups</b>.
+    Activity level adjusts recommended daily amount automatically.
   </div>
 
-  <label>Coco weight (lbs)</label>
-  <input type="number" id="cocoWeight" value="55" min="1" step="1">
+  <div class="twoCol">
+    <div>
+      <label>Coco weight (lbs)</label>
+      <input type="number" id="cocoWeight" value="55" min="1" step="1">
+    </div>
+    <div>
+      <label>Ollie weight (lbs)</label>
+      <input type="number" id="ollieWeight" value="65" min="1" step="1">
+    </div>
+  </div>
 
-  <label>Ollie weight (lbs)</label>
-  <input type="number" id="ollieWeight" value="65" min="1" step="1">
-
-  <label>Feeding % of bodyweight per day</label>
-  <input type="range" id="feedPercent" min="1.5" max="4" step="0.1" value="2.5">
-  <div class="subtle"><span id="percentLabel">2.5%</span></div>
-
-  <label>Meals per day</label>
-  <select id="mealsPerDay">
-    <option value="1">1</option>
-    <option value="2" selected>2</option>
-    <option value="3">3</option>
+  <label>Activity level</label>
+  <select id="activity">
+    <option value="sedentary">Sedentary / weight loss</option>
+    <option value="normal" selected>Normal</option>
+    <option value="active">Active</option>
+    <option value="very_active">Very active</option>
+    <option value="working">Working / high output</option>
   </select>
+  <div class="subtle" id="activityHint"></div>
 
-  <label>Batch days</label>
-  <input type="range" id="batchDays" min="1" max="7" value="7">
-  <div class="subtle"><span id="batchLabel">7 days</span></div>
+  <div class="twoCol">
+    <div>
+      <label>Meals per day</label>
+      <select id="mealsPerDay">
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+        <option value="3">3</option>
+      </select>
+    </div>
+    <div>
+      <label>Batch days</label>
+      <input type="range" id="batchDays" min="1" max="7" value="7">
+      <div class="subtle"><span id="batchLabel">7 days</span></div>
+    </div>
+  </div>
 
-  <div class="divider"></div>
-
-  <label>For liquids (bone broth, etc.), display as</label>
+  <label>Liquids display as</label>
   <select id="liquidUnit">
     <option value="fl_oz" selected>fl oz (US)</option>
     <option value="cups">cups</option>
@@ -147,148 +218,341 @@
   </div>
 
   <div id="mealOutput"></div>
+
+  <details>
+    <summary>Feeding notes (quick + practical)</summary>
+    <div class="subtle" style="margin-top:8px; line-height:1.45">
+      This app gives a <b>starting point</b> for planning and shopping. Watch body condition, stools, energy, itching, and adjust slowly.<br>
+      If either dog is sensitive, try fewer ingredients first (simple protein + simple carb) and add flavor boosts later.<br><br>
+      <b>Broth/puree:</b> great for hydration and taste. Keep it plain (no onion/garlic seasoning).
+    </div>
+  </details>
 </div>
 
-<div id="shared" class="card" style="display:none">
-  <h2>Shared Safe Foods</h2>
-  <div class="subtle">This is your safe library used for meal ideas (only No Reactivity for both).</div>
-  <div class="divider"></div>
-  <div id="sharedList"></div>
+<!-- LISTS -->
+<div id="lists" class="card" style="display:none">
+  <h2>Lists</h2>
+  <div class="subtle">A readable directory of what is flagged (Food + Additives). Search removed per your preference.</div>
+
+  <details open>
+    <summary>Food reactions (High + Moderate)</summary>
+    <div id="foodList" class="subtle" style="margin-top:8px; line-height:1.55"></div>
+  </details>
+
+  <details>
+    <summary>Additives reactions (High + Moderate)</summary>
+    <div id="additiveList" class="subtle" style="margin-top:8px; line-height:1.55"></div>
+  </details>
 </div>
 
 <script>
 /* =============================
-   ALLERGY DATA (HIGH/MOD only)
-   (We exclude these from meals.)
+   DATA: COCO + OLLIE (FOOD)
 ============================= */
 
-const cocoModerate = [
-  "ammonium laureth sulfate","beef","bilberry","cheese - cheddar","chlorella","coconut",
-  "cornflakes","egg yolk - chicken","egg yolk - duck","hare","iceberg lettuce","lemon",
-  "pecan nut","pepper - green","psyllium seed husk","strawberry","turnip","winkles"
-];
-
-const cocoHigh = [
-  "canola oil","chia seeds","clove","haddock","herring","mozzarella","paprika","peach",
-  "rabbit","rabbit heart","rabbit liver","rapeseed oil","sugar (brown)","sweet potato","tahini"
-];
-
-const ollieModerate = [
-  "anchovy","catfish","cheese - cottage","chicken heart","condensed milk","cream",
-  "egg white - chicken","emmer wheat","farina secalis cerealis","ginkgo biloba","greens (collard)",
-  "lamb liver","liver - ox","milkweed","onion","pepper - green","pheasant gizzard","pigeon",
-  "raisin","skate","soy flour","sweet potato","tilefish","winkles"
-];
-
-const ollieHigh = [
-  "avocado oil","boar","buttermilk","canola meal","coconut","coconut oil","crab","duck liver",
-  "noodles - wheat","papaya","parmesan","prawn","sage","strawberry","tapioca","venison meal"
-];
+const DATA = {
+  coco:{
+    high:[
+      "Canola Oil","Chia Seeds","Clove","Haddock","Herring",
+      "Mozzarella","Paprika","Peach","Rabbit","Rabbit Heart",
+      "Rabbit Liver","Rapeseed oil","Sugar (brown)","Sweet Potato","Tahini"
+    ],
+    moderate:[
+      "Ammonium Laureth Sulfate","Beef","Bilberry","Cheese - Cheddar","Chlorella","Coconut","Cornflakes",
+      "Egg Yolk - Chicken","Egg Yolk - Duck","Hare","Iceberg lettuce","Lemon","Pecan nut","Pepper - green",
+      "Psyllium Seed Husk","Strawberry","Turnip","Winkles"
+    ]
+  },
+  ollie:{
+    high:[
+      "Avocado oil","Boar","Buttermilk","Canola Meal","Coconut","Coconut Oil","Crab","Duck Liver",
+      "Noodles - wheat","Papaya","Parmesan","Prawn","Sage","Strawberry","Tapioca","Venison Meal"
+    ],
+    moderate:[
+      "Anchovy","Catfish","Cheese - Cottage","Chicken Heart","Condensed milk","Cream","Egg White - Chicken",
+      "Emmer wheat","Farina secalis cerealis","Ginkgo biloba","Greens (Collard)","Lamb Liver","Liver - ox",
+      "Milkweed","Onion","Pepper - green","Pheasant Gizzard","Pigeon","Raisin","Skate","Soy Flour",
+      "Sweet Potato","Tilefish","Winkles"
+    ]
+  }
+};
 
 /* =============================
-   SAFE FOOD LIBRARY
-   Only foods that are considered generally dog-safe.
-   ALSO: We will FILTER OUT anything that appears in
-   ANY dog’s High/Moderate lists.
+   DATA: COCO + OLLIE (ADDITIVES)
+   (From the text you pasted earlier)
 ============================= */
 
-// Proteins (dog-safe)
-const proteins = [
-  "chicken","turkey","duck","lamb","bison","venison","salmon","sardine"
-];
-
-// Carbs (dog-safe)
-const carbs = [
-  "rice (white)","rice (brown)","oats","barley","quinoa"
-];
-
-// Veggies (dog-safe)
-const veggies = [
-  "carrot","zucchini","spinach","broccoli","green beans","pumpkin"
-];
-
-// Fats (dog-safe)
-const fats = [
-  "olive oil","fish oil","salmon oil"
-];
-
-// Flavor boosters (dog-safe)
-const flavorBoosters = [
-  "pumpkin puree","bone broth","blueberries","apple","parsley"
-];
+const ADDITIVES = {
+  coco:{
+    high:[
+      "E 110 Sunset Yellow (orange synthetic dye)",
+      "E 160 b Annatto (yellow to orange coloring)",
+      "E 180 Lithol Rubine BK (red synthetic dye)",
+      "E 221 Sodium sulphite (preservative)",
+      "E 332 Potassium citrate (acidity regulator)",
+      "E 483 Stearyl tartrate (emulsifier)",
+      "E 576 Sodium gluconate (acidity regulator)",
+      "E 620 Glutamic acid (flavour enhancer)",
+      "E 959 Neohesperidine DC (sweetener)",
+      "Rose (Rosa spp.)"
+    ],
+    moderate:[
+      "Artichoke leaf extract",
+      "E 200 Sorbic acid (preservative)",
+      "E 233 Thiabendazole (preservative/fungicide)",
+      "E 312 Dodecyl gallate (antioxidant)",
+      "E 340 Potassium phosphate (emulsifier)",
+      "E 411 Xantham gum (thickener)",
+      "E 528 Magnesium hydroxide (acidity regulator)",
+      "E 535 Sodium ferrocyanide (anti-caking agent)",
+      "E 624 Monoammonium glutamate (flavour enhancer)",
+      "E 629 Calcium guanylate (flavour enhancer)",
+      "E 630 Inosinic acid (flavour enhancer)",
+      "E 927 Azodicarbonamide (flour treatment agent)",
+      "Rosemary Extract"
+    ]
+  },
+  ollie:{
+    high:[
+      "E 141 Copper complexes of chlorophyll (green coloring)",
+      "E 150 d Sulphite Ammonia Caramel (brown coloring)",
+      "E 160 e Beta-apo-8'-carotenal (orange pigment)",
+      "E 162 Beetroot red (natural red coloring)",
+      "E 218 Methyl p-hydroxybenzoate (preservative)",
+      "E 242 Dimethyl dicarbonate (sterilizing agent)",
+      "E 260 Acetic acid (preservative)",
+      "E 263 Calcium acetate (acidity regulator)",
+      "E 270 Lactic acid (preservative)",
+      "E 335 Sodium tartrate (acidity regulator)",
+      "E 472 d Tartaric acid esters of mono- and diglycerides (emulsifier)",
+      "E 473 Sucrose esters of fatty acids (emulsifier)",
+      "E 477 Propylene glycol esters of fatty acids (emulsifier)",
+      "E 522 Aluminium potassium sulphate (stabiliser)",
+      "E 541 Sodium aluminium phosphate (raising agent)",
+      "E 630 Inosinic acid (flavour enhancer)",
+      "E 941 Nitrogen (packing gas)",
+      "E 951 Aspartame (sweetener)",
+      "Formic acid",
+      "Pepsin",
+      "Tartaric acid"
+    ],
+    moderate:[
+      "E 150 c Ammonia Caramel (brown coloring)",
+      "E 1520 Propylene glycol",
+      "E 249 Potassium nitrite (curing agent)",
+      "E 284 Boric acid (preservative)",
+      "E 312 Dodecyl gallate (antioxidant)",
+      "E 334 Tartaric acid (acidity regulator)",
+      "E 353 Metatartaric acid (acidity regulator)",
+      "E 354 Calcium tartrate (acidity regulator)",
+      "E 472 e Mono- and diacetyltartaric acid esters of mono- and diglycerides (emulsifier)",
+      "E 476 Polyglycerol polyricinoleate (emulsifier)",
+      "E 554 Sodium aluminosilicate (anti-caking agent)",
+      "E 621 Monosodium glutamate (flavour enhancer)",
+      "E 634 Calcium 5'-ribonucleotides (flavour enhancer)",
+      "E 902 Candelilla wax (coating agent)",
+      "E 903 Carnauba wax (coating agent)",
+      "Formalin"
+    ]
+  }
+};
 
 /* =============================
-   HELPERS
+   SAFE FOOD LIBRARY (dog-safe)
+   We will FILTER OUT any item that is
+   High or Moderate for either dog.
+============================= */
+
+const LIB = {
+  proteins:[
+    "Chicken","Turkey","Duck","Lamb","Bison","Venison","Salmon","Sardine"
+  ],
+  carbs:[
+    "Rice (brown)","Rice (white)","Quinoa","Oats","Barley"
+  ],
+  veggies:[
+    "Pumpkin","Pumpkin puree","Zucchini","Spinach","Broccoli","Green beans","Peas","Cucumber"
+  ],
+  fats:[
+    "Olive oil","Fish oil","Salmon oil","Sunflower oil"
+  ],
+  boosts:[
+    "Bone broth","Blueberries","Apple","Parsley"
+  ]
+};
+
+/* =============================
+   SMART MATCHING ENGINE
 ============================= */
 
 function norm(s){
-  return (s||"").toLowerCase().trim().replace(/\s+/g," ");
+  return (s||"")
+    .toLowerCase()
+    .replace(/\u2019/g,"'")                 // curly apostrophe → normal
+    .replace(/[•]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
 }
 
-function severityForDog(item, dog){
-  item = norm(item);
-  if(dog==="coco"){
-    if(cocoHigh.includes(item)) return "High";
-    if(cocoModerate.includes(item)) return "Moderate";
+// Strip parenthesis NOTES from OCR text safely.
+// Example: "calcium carbonate (to maintain...)" → "calcium carbonate"
+function stripParensNotes(s){
+  // remove "(...)" segments
+  return (s||"").replace(/\([^)]*\)/g,"").replace(/\s+/g," ").trim();
+}
+
+// Basic singularization (good enough for scanner terms)
+function singularize(word){
+  // carrots -> carrot, berries -> berry, etc (light heuristic)
+  if(word.endsWith("ies") && word.length > 4) return word.slice(0,-3) + "y";
+  if(word.endsWith("ses") && word.length > 4) return word.slice(0,-2);  // e.g. "dresses" -> "dress"
+  if(word.endsWith("s") && !word.endsWith("ss") && word.length > 3) return word.slice(0,-1);
+  return word;
+}
+
+// Normalize a phrase into tokens we can compare
+function normalizePhrase(raw){
+  let s = norm(raw);
+  s = s.replace(/^ingredients\s*:\s*/i,""); // remove leading "Ingredients:"
+  return s;
+}
+
+// Convert a phrase to a "match key" (removes punctuation, extra spaces)
+function keyify(s){
+  return norm(s)
+    .replace(/[^a-z0-9\s]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+// Build multiple candidate keys for an input item (so "yogurt" matches "yogurt (plain)")
+function buildCandidateKeys(raw){
+  const base = normalizePhrase(raw);
+  const noParens = stripParensNotes(base);
+
+  const k1 = keyify(base);
+  const k2 = keyify(noParens);
+
+  const tokens = k2.split(" ").filter(Boolean).map(singularize);
+  const k3 = tokens.join(" ");
+
+  // Also return single-word head (useful for parent keywords)
+  const head = tokens[0] || "";
+
+  const set = new Set([k1,k2,k3].filter(Boolean));
+  return { keys:[...set], head };
+}
+
+// Parent keyword groups.
+// Important rule: if user enters "rice flour", we do NOT treat it as generic "rice".
+const PARENTS = {
+  rice: ["rice (brown)","rice (white)","rice flour","rice bran","rice milk"],
+  yogurt: ["yogurt (plain)"],
+  coconut: ["coconut","coconut oil","coconut milk","coconut water"],
+  pepper: ["pepper - green","pepper - red","pepper - white","pepper - black"],
+  egg: ["egg white - chicken","egg yolk - chicken","egg white - duck","egg yolk - duck"]
+};
+
+function looksSpecificRice(inputKey){
+  // if user explicitly typed flour/bran/milk, treat as specific variant
+  return /\brice\b/.test(inputKey) && (/\bflour\b/.test(inputKey) || /\bbran\b/.test(inputKey) || /\bmilk\b/.test(inputKey));
+}
+
+function shouldExpandParent(raw){
+  const {keys, head} = buildCandidateKeys(raw);
+  const k = keys[0] || "";
+  // Expand if user typed exactly parent word, or very short phrase like "rice"
+  if(head && PARENTS[head]){
+    // Special case: rice flour etc should not expand
+    if(head==="rice" && looksSpecificRice(k)) return false;
+    // If input is just "rice" or starts with "rice " but not specific, we expand
+    const trimmed = keyify(stripParensNotes(raw));
+    const parts = trimmed.split(" ").filter(Boolean);
+    if(parts.length === 1) return true; // "rice"
+    if(head==="yogurt" && parts.length === 1) return true; // "yogurt"
+    if(head==="coconut" && parts.length === 1) return true;
+    if(head==="pepper" && parts.length === 1) return true;
+    if(head==="egg" && parts.length === 1) return true;
+  }
+  return false;
+}
+
+/* =============================
+   REACTION LOOKUP
+============================= */
+
+function buildLookup(list){
+  // Map multiple keys → canonical label
+  const map = new Map();
+  list.forEach(item=>{
+    const raw = item;
+    const cleaned = stripParensNotes(raw);
+    const k1 = keyify(raw);
+    const k2 = keyify(cleaned);
+    map.set(k1, raw);
+    map.set(k2, raw);
+  });
+  return map;
+}
+
+const LOOKUP = {
+  food:{
+    coco:{
+      high: buildLookup(DATA.coco.high),
+      moderate: buildLookup(DATA.coco.moderate)
+    },
+    ollie:{
+      high: buildLookup(DATA.ollie.high),
+      moderate: buildLookup(DATA.ollie.moderate)
+    }
+  },
+  additives:{
+    coco:{
+      high: buildLookup(ADDITIVES.coco.high),
+      moderate: buildLookup(ADDITIVES.coco.moderate)
+    },
+    ollie:{
+      high: buildLookup(ADDITIVES.ollie.high),
+      moderate: buildLookup(ADDITIVES.ollie.moderate)
+    }
+  }
+};
+
+function reactionFor(mode, dog, rawInput){
+  const {keys} = buildCandidateKeys(rawInput);
+  const hi = LOOKUP[mode][dog].high;
+  const mo = LOOKUP[mode][dog].moderate;
+
+  // Strict = exact phrase match only
+  const matchMode = document.getElementById("matchMode").value;
+
+  if(matchMode === "strict"){
+    const k = keyify(rawInput);
+    if(hi.has(k)) return {sev:"High", canonical:hi.get(k)};
+    if(mo.has(k)) return {sev:"Moderate", canonical:mo.get(k)};
     return null;
   }
-  if(dog==="ollie"){
-    if(ollieHigh.includes(item)) return "High";
-    if(ollieModerate.includes(item)) return "Moderate";
-    return null;
+
+  // Smart = try all candidate keys + token singularization
+  for(const k of keys){
+    if(hi.has(k)) return {sev:"High", canonical:hi.get(k)};
+    if(mo.has(k)) return {sev:"Moderate", canonical:mo.get(k)};
   }
   return null;
 }
 
-function isBannedForEither(item){
-  item = norm(item);
-  return cocoHigh.includes(item) || cocoModerate.includes(item) || ollieHigh.includes(item) || ollieModerate.includes(item);
-}
-
-function pickRandom(arr){
-  return arr[Math.floor(Math.random()*arr.length)];
-}
-
-function ozToCups(oz){
-  // rough kitchen conversion for mixed foods
-  // 1 cup ~ 4 oz (by volume estimate). This is intentionally approximate.
-  return oz/4;
-}
-
-function ozToLbsOz(totalOz){
-  const lbs = Math.floor(totalOz/16);
-  const oz = totalOz - (lbs*16);
-  return {lbs, oz};
-}
-
-function fmtLbsOz(totalOz){
-  const {lbs, oz} = ozToLbsOz(totalOz);
-  const ozFixed = oz.toFixed(1).replace(/\.0$/,"");
-  if(lbs <= 0) return `${ozFixed} oz`;
-  return `${lbs} lb ${ozFixed} oz`;
-}
-
-function approxFlOzFromOzWeight(ozWeight){
-  // If user is measuring broth, we can treat 1 oz (weight) ~ 1 fl oz (volume) for water-like liquids.
-  // Not perfect, but good enough for broth.
-  return ozWeight;
-}
-
-function fmtLiquid(ozWeight){
-  const unit = document.getElementById("liquidUnit").value;
-  const flOz = approxFlOzFromOzWeight(ozWeight);
-  if(unit==="cups"){
-    return `${(flOz/8).toFixed(2).replace(/0+$/,"").replace(/\.$/,"")} cups`;
-  }
-  return `${flOz.toFixed(1).replace(/\.0$/,"")} fl oz`;
+// Hard rule for meal planning: exclude anything Moderate/High for either dog
+function isBannedFood(rawInput){
+  const rC = reactionFor("food","coco", rawInput);
+  const rO = reactionFor("food","ollie", rawInput);
+  return !!(rC || rO);
 }
 
 /* =============================
-   TAB SWITCH
+   UI: TABS
 ============================= */
-
 function showTab(tab){
-  ["scanner","meal","shared"].forEach(t=>{
+  ["scanner","meal","lists"].forEach(t=>{
     document.getElementById(t).style.display = (t===tab) ? "block" : "none";
     document.getElementById("tab-"+t).classList.toggle("active", t===tab);
   });
@@ -298,53 +562,156 @@ function showTab(tab){
    SCANNER
 ============================= */
 
-function scanIngredients(){
-  const raw = document.getElementById("scanInput").value || "";
-  const items = raw.split(/[\n,]+/).map(x=>norm(x)).filter(Boolean);
+function parseIngredientsText(raw){
+  // Split by commas/newlines/semicolons, remove "Ingredients:" and ignore empty
+  let s = raw || "";
+  s = s.replace(/\r/g,"");
+  // Many OCR lines include "Ingredients:" mid-line
+  s = s.replace(/ingredients\s*:\s*/ig, "");
+  return s.split(/[\n,;]+/)
+    .map(x=>x.trim())
+    .filter(Boolean);
+}
 
-  if(items.length===0){
+function scanIngredients(){
+  const mode = document.getElementById("scanMode").value;
+  const raw = document.getElementById("scanInput").value || "";
+  const items = parseIngredientsText(raw);
+
+  if(items.length === 0){
     document.getElementById("scanResults").innerHTML = "<div class='result subtle'>Paste some ingredients first.</div>";
     return;
   }
 
   let html = "";
-  items.forEach(i=>{
-    const cocoSev = severityForDog(i,"coco");
-    const ollieSev = severityForDog(i,"ollie");
 
-    const anyBad = !!(cocoSev || ollieSev);
+  items.forEach(item=>{
+    // Parent expansion: "rice" → show breakdown of variants (Caution)
+    if(shouldExpandParent(item)){
+      const {head} = buildCandidateKeys(item);
+      const variants = PARENTS[head] || [];
+      html += buildCautionBlock(mode, item, head, variants);
+      return;
+    }
 
-    if(anyBad){
-      const reasons = [];
-      if(cocoSev) reasons.push(`Coco: ${cocoSev}`);
-      if(ollieSev) reasons.push(`Ollie: ${ollieSev}`);
+    const rC = reactionFor(mode, "coco", item);
+    const rO = reactionFor(mode, "ollie", item);
 
-      const sevPills = reasons.map(r=>{
-        const sev = r.includes("High") ? "high" : "mod";
-        return `<span class="pill pill-${sev}">${r}</span>`;
-      }).join(" ");
-
-      html += `
-        <div class="result r-bad">
-          <div><b>${i}</b> — NOT SAFE</div>
-          <div style="margin-top:6px">${sevPills}</div>
-        </div>
-      `;
-    }else{
-      html += `
-        <div class="result r-safe">
-          <div><b>${i}</b> — SAFE</div>
-          <div class="subtle" style="margin-top:6px">No reactivity listed for Coco or Ollie.</div>
-        </div>
-      `;
+    if(rC || rO){
+      html += buildNotSafeBlock(item, rC, rO);
+    } else {
+      html += buildSafeBlock(item);
     }
   });
 
   document.getElementById("scanResults").innerHTML = html;
 }
 
+function buildSafeBlock(item){
+  return `
+    <div class="result r-safe">
+      <div><b>${escapeHtml(item)}</b> — SAFE</div>
+      <div class="subtle" style="margin-top:6px">No listed reactivity found for Coco or Ollie.</div>
+      <div style="margin-top:6px">
+        <span class="pill pill-safe">Coco: OK</span>
+        <span class="pill pill-safe">Ollie: OK</span>
+      </div>
+    </div>
+  `;
+}
+
+function buildNotSafeBlock(item, rC, rO){
+  const pills = [];
+  if(rC){
+    pills.push(`<span class="pill ${rC.sev==="High"?"pill-high":"pill-mod"}">Coco: ${rC.sev} (${escapeHtml(rC.canonical)})</span>`);
+  } else {
+    pills.push(`<span class="pill pill-safe">Coco: OK</span>`);
+  }
+  if(rO){
+    pills.push(`<span class="pill ${rO.sev==="High"?"pill-high":"pill-mod"}">Ollie: ${rO.sev} (${escapeHtml(rO.canonical)})</span>`);
+  } else {
+    pills.push(`<span class="pill pill-safe">Ollie: OK</span>`);
+  }
+
+  const reasonBits = [];
+  if(rC) reasonBits.push(`Coco listed: ${rC.sev}`);
+  if(rO) reasonBits.push(`Ollie listed: ${rO.sev}`);
+
+  return `
+    <div class="result r-bad">
+      <div><b>${escapeHtml(item)}</b> — NOT SAFE</div>
+      <div class="subtle" style="margin-top:6px">${reasonBits.join(" · ")}</div>
+      <div style="margin-top:6px">${pills.join(" ")}</div>
+    </div>
+  `;
+}
+
+function buildCautionBlock(mode, rawItem, parentKey, variants){
+  // Behavior B requested:
+  // - If someone types "yogurt" but only "yogurt (plain)" exists and is moderate/high,
+  //   show CAUTION: "Only yogurt (plain) appears in results; other types not tested."
+  // - For rice: show each variant status per dog.
+  const title = escapeHtml(rawItem);
+  const p = escapeHtml(parentKey);
+
+  let rows = "";
+  let anyFlags = false;
+
+  variants.forEach(v=>{
+    const rC = reactionFor(mode, "coco", v);
+    const rO = reactionFor(mode, "ollie", v);
+    const cocoTxt = rC ? `${rC.sev}` : "OK";
+    const ollieTxt = rO ? `${rO.sev}` : "OK";
+    if(rC || rO) anyFlags = true;
+
+    rows += `
+      <div class="subtle" style="margin-top:6px">
+        <b>${escapeHtml(v)}</b> —
+        <span class="${rC ? (rC.sev==="High"?"r-bad":"") : "r-safe"}">${rC ? `Coco: ${cocoTxt}` : "Coco: OK"}</span>
+        ·
+        <span class="${rO ? (rO.sev==="High"?"r-bad":"") : "r-safe"}">${rO ? `Ollie: ${ollieTxt}` : "Ollie: OK"}</span>
+      </div>
+    `;
+  });
+
+  let note = "";
+  if(parentKey === "yogurt"){
+    // special note: other yogurt types not tested
+    note = `<div class="subtle" style="margin-top:8px">
+      Note: Only <b>Yogurt (plain)</b> appears in your test lists. Other yogurt types may behave differently.
+    </div>`;
+  } else {
+    note = `<div class="subtle" style="margin-top:8px">
+      Reason: Contains <b>${p}</b> variants. Check which specific type you’re using.
+    </div>`;
+  }
+
+  return `
+    <div class="result r-caution">
+      <div><b>${title}</b> — CAUTION</div>
+      <div style="margin-top:6px">
+        <span class="pill pill-caution">Keyword: ${p}</span>
+        ${anyFlags ? `<span class="pill pill-mod">Some variants flagged</span>` : `<span class="pill pill-safe">No variants flagged</span>`}
+      </div>
+      ${note}
+      <div class="divider"></div>
+      ${rows}
+    </div>
+  `;
+}
+
 function runDemo(){
-  document.getElementById("scanInput").value = "Chicken\nBeef\nPumpkin Puree\nCoconut Oil\nBone Broth";
+  document.getElementById("scanMode").value = "food";
+  document.getElementById("matchMode").value = "smart";
+  document.getElementById("scanInput").value =
+`Ingredients: apples, calcium ascorbate, ascorbic acid, calcium carbonate (to maintain freshness and color)
+Chicken
+Beef
+Yogurt
+Carrots
+Rice
+Rice flour
+Coconut oil`;
   scanIngredients();
 }
 
@@ -352,23 +719,68 @@ function runDemo(){
    MEAL PLANNER
 ============================= */
 
-document.getElementById("feedPercent").oninput = function(){
-  document.getElementById("percentLabel").innerText = this.value + "%";
-}
 document.getElementById("batchDays").oninput = function(){
   document.getElementById("batchLabel").innerText = this.value + " days";
+};
+
+const ACTIVITY_TO_PERCENT = {
+  sedentary: 2.0,
+  normal: 2.5,
+  active: 3.0,
+  very_active: 3.5,
+  working: 4.0
+};
+
+function updateActivityHint(){
+  const val = document.getElementById("activity").value;
+  const pct = ACTIVITY_TO_PERCENT[val];
+  document.getElementById("activityHint").innerText =
+    `This uses a simple planning rule: about ${pct.toFixed(1)}% of bodyweight per day (starting point).`;
+}
+document.getElementById("activity").onchange = updateActivityHint;
+updateActivityHint();
+
+function lbsToOz(lbs){ return lbs * 16; }
+function ozToCups(oz){
+  // Rough kitchen estimate: 1 cup ≈ 4 oz (by volume)
+  return oz / 4;
+}
+function ozToLbsOz(totalOz){
+  const lbs = Math.floor(totalOz/16);
+  const oz = totalOz - (lbs*16);
+  return {lbs, oz};
+}
+function fmtLbsOz(totalOz){
+  const {lbs, oz} = ozToLbsOz(totalOz);
+  const ozFixed = oz.toFixed(1).replace(/\.0$/,"");
+  if(lbs <= 0) return `${ozFixed} oz`;
+  return `${lbs} lb ${ozFixed} oz`;
+}
+function fmtLiquid(ozWeight){
+  const unit = document.getElementById("liquidUnit").value;
+  // treat broth as water-like: 1 oz weight ≈ 1 fl oz
+  const flOz = ozWeight;
+  if(unit==="cups"){
+    return `${(flOz/8).toFixed(2).replace(/0+$/,"").replace(/\.$/,"")} cups`;
+  }
+  return `${flOz.toFixed(1).replace(/\.0$/,"")} fl oz`;
+}
+
+function filterSafe(list){
+  return list.filter(item => !isBannedFood(item));
 }
 
 let groceryData = null;
 
-function filteredSafe(arr){
-  return arr.map(norm).filter(x=>!isBannedForEither(x));
+function pickRandom(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
 }
 
 function generateMeal(){
   const cocoLbs = parseFloat(document.getElementById("cocoWeight").value || "0");
   const ollieLbs = parseFloat(document.getElementById("ollieWeight").value || "0");
-  const percent = parseFloat(document.getElementById("feedPercent").value || "2.5") / 100;
+  const activity = document.getElementById("activity").value;
+  const pct = (ACTIVITY_TO_PERCENT[activity] || 2.5) / 100;
   const meals = parseInt(document.getElementById("mealsPerDay").value || "2", 10);
   const days = parseInt(document.getElementById("batchDays").value || "7", 10);
 
@@ -377,34 +789,38 @@ function generateMeal(){
     return;
   }
 
-  // Daily food in oz (by bodyweight % rule)
-  const cocoDailyOz = cocoLbs * percent * 16;
-  const ollieDailyOz = ollieLbs * percent * 16;
+  // Daily total food (oz) by planning % rule
+  const cocoDailyOz = lbsToOz(cocoLbs * pct);
+  const ollieDailyOz = lbsToOz(ollieLbs * pct);
 
-  // Per meal
   const cocoPerMealOz = cocoDailyOz / meals;
   const olliePerMealOz = ollieDailyOz / meals;
 
-  // Batch totals (both dogs combined)
   const totalDailyOz = cocoDailyOz + ollieDailyOz;
   const batchTotalOz = totalDailyOz * days;
 
-  // Safe ingredient pools (filtered to exclude any Moderate/High for either dog)
-  const pSafe = filteredSafe(proteins);
-  const cSafe = filteredSafe(carbs);
-  const vSafe = filteredSafe(veggies);
-  const fSafe = filteredSafe(fats);
-  const bSafe = filteredSafe(flavorBoosters);
+  // Safe pools
+  const proteins = filterSafe(LIB.proteins);
+  const carbs    = filterSafe(LIB.carbs);
+  const veggies  = filterSafe(LIB.veggies);
+  const fats     = filterSafe(LIB.fats);
+  const boosts   = filterSafe(LIB.boosts);
 
-  // If a pool gets empty, we still want the app to not break
-  const protein = pSafe.length ? pickRandom(pSafe) : "chicken";
-  const carb    = cSafe.length ? pickRandom(cSafe) : "rice (white)";
-  const veg     = vSafe.length ? pickRandom(vSafe) : "carrot";
-  const fat     = fSafe.length ? pickRandom(fSafe) : "olive oil";
-  const boost   = bSafe.length ? pickRandom(bSafe) : "pumpkin puree";
+  if(!proteins.length || !carbs.length || !veggies.length){
+    document.getElementById("mealOutput").innerHTML =
+      "<div class='result r-bad'>One or more categories has no safe options after filtering. Add more safe items to the library.</div>";
+    return;
+  }
 
-  // Macro split for the batch (by weight) – simple home-cook heuristic
-  // Protein 50% / Carb 20% / Veg 15% / Fat 5% / Flavor 10% (broth/puree/etc)
+  // Pick a meal
+  const protein = pickRandom(proteins);
+  const carb    = pickRandom(carbs);
+  const veg     = pickRandom(veggies);
+  const fat     = fats.length ? pickRandom(fats) : "Fish oil";
+  const boost   = boosts.length ? pickRandom(boosts) : "Bone broth";
+
+  // Macro split by weight (simple home-cook heuristic)
+  // Protein 50% / Carb 20% / Veg 15% / Fat 5% / Boost 10%
   const proteinOz = batchTotalOz * 0.50;
   const carbOz    = batchTotalOz * 0.20;
   const vegOz     = batchTotalOz * 0.15;
@@ -412,56 +828,61 @@ function generateMeal(){
   const boostOz   = batchTotalOz * 0.10;
 
   groceryData = {
-    protein: {name: protein, oz: proteinOz},
-    carb:    {name: carb, oz: carbOz},
-    veg:     {name: veg, oz: vegOz},
-    fat:     {name: fat, oz: fatOz},
-    boost:   {name: boost, oz: boostOz},
-    meta:    {days, meals, cocoDailyOz, ollieDailyOz, cocoPerMealOz, olliePerMealOz, batchTotalOz}
+    protein:{name:protein, oz:proteinOz},
+    carb:{name:carb, oz:carbOz},
+    veg:{name:veg, oz:vegOz},
+    fat:{name:fat, oz:fatOz},
+    boost:{name:boost, oz:boostOz},
+    meta:{days, meals, cocoDailyOz, ollieDailyOz, cocoPerMealOz, olliePerMealOz, batchTotalOz, pct: pct*100, activity}
   };
 
-  const out = `
+  document.getElementById("mealOutput").innerHTML = `
     <div class="divider"></div>
     <h3 style="margin:0 0 6px">Meal Suggestion</h3>
-    <div class="subtle">All picks are filtered to exclude any Moderate/High for either dog.</div>
+    <div class="subtle">Filtered to exclude anything Moderate/High for either dog.</div>
 
     <div class="divider"></div>
-
-    <div><b>Protein:</b> ${protein}</div>
-    <div><b>Carb:</b> ${carb}</div>
-    <div><b>Veg:</b> ${veg}</div>
-    <div><b>Fat:</b> ${fat}</div>
-    <div><b>Flavor/Boost:</b> ${boost} <span class="subtle">(great for taste + moisture)</span></div>
+    <div><b>Protein:</b> ${escapeHtml(protein)}</div>
+    <div><b>Carb:</b> ${escapeHtml(carb)}</div>
+    <div><b>Veg:</b> ${escapeHtml(veg)}</div>
+    <div><b>Fat:</b> ${escapeHtml(fat)}</div>
+    <div><b>Flavor/Boost:</b> ${escapeHtml(boost)} <span class="subtle">(taste + moisture)</span></div>
 
     <div class="divider"></div>
-
     <h3 style="margin:0 0 6px">Feeding Amounts</h3>
-    <div><b>Coco daily:</b> ${fmtLbsOz(cocoDailyOz)} (~${ozToCups(cocoDailyOz).toFixed(2)} cups)</div>
+    <div class="subtle">Activity: <b>${escapeHtml(activityLabel(activity))}</b> · Rule used: <b>${groceryData.meta.pct.toFixed(1)}%</b> of bodyweight/day</div>
+
+    <div style="margin-top:8px"><b>Coco daily:</b> ${fmtLbsOz(cocoDailyOz)} (~${ozToCups(cocoDailyOz).toFixed(2)} cups)</div>
     <div><b>Coco per meal:</b> ${fmtLbsOz(cocoPerMealOz)} (~${ozToCups(cocoPerMealOz).toFixed(2)} cups)</div>
 
     <div style="margin-top:10px"><b>Ollie daily:</b> ${fmtLbsOz(ollieDailyOz)} (~${ozToCups(ollieDailyOz).toFixed(2)} cups)</div>
     <div><b>Ollie per meal:</b> ${fmtLbsOz(olliePerMealOz)} (~${ozToCups(olliePerMealOz).toFixed(2)} cups)</div>
 
     <div class="divider"></div>
-
     <h3 style="margin:0 0 6px">Batch Cook (${days} day${days===1?"":"s"})</h3>
-    <div><b>Total batch food:</b> ${fmtLbsOz(batchTotalOz)} (~${ozToCups(batchTotalOz).toFixed(2)} cups)</div>
+    <div><b>Total batch:</b> ${fmtLbsOz(batchTotalOz)} (~${ozToCups(batchTotalOz).toFixed(2)} cups)</div>
 
     <div class="divider"></div>
-
     <h3 style="margin:0 0 6px">Grocery Breakdown</h3>
-    <div class="subtle">Measured as lbs+oz. For broth/liquids we also show fl oz.</div>
-
+    <div class="subtle">Measured as lbs+oz. Boost shows approximate fl oz for easy measuring.</div>
     <div class="result">
-      <div><b>${protein}</b> — ${fmtLbsOz(proteinOz)}</div>
-      <div><b>${carb}</b> — ${fmtLbsOz(carbOz)}</div>
-      <div><b>${veg}</b> — ${fmtLbsOz(vegOz)}</div>
-      <div><b>${fat}</b> — ${fmtLbsOz(fatOz)}</div>
-      <div><b>${boost}</b> — ${fmtLbsOz(boostOz)} <span class="subtle">(≈ ${fmtLiquid(boostOz)})</span></div>
+      <div><b>${escapeHtml(protein)}</b> — ${fmtLbsOz(proteinOz)}</div>
+      <div><b>${escapeHtml(carb)}</b> — ${fmtLbsOz(carbOz)}</div>
+      <div><b>${escapeHtml(veg)}</b> — ${fmtLbsOz(vegOz)}</div>
+      <div><b>${escapeHtml(fat)}</b> — ${fmtLbsOz(fatOz)}</div>
+      <div><b>${escapeHtml(boost)}</b> — ${fmtLbsOz(boostOz)} <span class="subtle">(≈ ${fmtLiquid(boostOz)})</span></div>
     </div>
   `;
+}
 
-  document.getElementById("mealOutput").innerHTML = out;
+function activityLabel(key){
+  return ({
+    sedentary:"Sedentary / weight loss",
+    normal:"Normal",
+    active:"Active",
+    very_active:"Very active",
+    working:"Working / high output"
+  })[key] || key;
 }
 
 function exportGrocery(){
@@ -476,13 +897,14 @@ function exportGrocery(){
 
 Batch: ${g.meta.days} day(s)
 Meals/day: ${g.meta.meals}
+Activity: ${activityLabel(g.meta.activity)}  (rule used: ${g.meta.pct.toFixed(1)}% bodyweight/day)
 
 INGREDIENTS (lbs + oz)
 - ${g.protein.name}: ${fmtLbsOz(g.protein.oz)}
 - ${g.carb.name}: ${fmtLbsOz(g.carb.oz)}
 - ${g.veg.name}: ${fmtLbsOz(g.veg.oz)}
 - ${g.fat.name}: ${fmtLbsOz(g.fat.oz)}
-- ${g.boost.name}: ${fmtLbsOz(g.boost.oz)} (≈ ${fmtLiquid(g.boost.oz)})
+- ${g.boost.name}: ${fmtLbsOz(g.boost.oz)}  (≈ ${fmtLiquid(g.boost.oz)})
 
 FEEDING AMOUNTS
 Coco daily: ${fmtLbsOz(g.meta.cocoDailyOz)} (~${ozToCups(g.meta.cocoDailyOz).toFixed(2)} cups)
@@ -492,7 +914,6 @@ Ollie daily: ${fmtLbsOz(g.meta.ollieDailyOz)} (~${ozToCups(g.meta.ollieDailyOz).
 Ollie per meal: ${fmtLbsOz(g.meta.olliePerMealOz)} (~${ozToCups(g.meta.olliePerMealOz).toFixed(2)} cups)
 `;
 
-  // Copy to clipboard if possible, else show an alert
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(()=>{
       alert("Copied grocery list to clipboard ✅");
@@ -505,28 +926,39 @@ Ollie per meal: ${fmtLbsOz(g.meta.olliePerMealOz)} (~${ozToCups(g.meta.olliePerM
 }
 
 /* =============================
-   SHARED SAFE LIST
+   LISTS TAB RENDER
 ============================= */
 
-function loadShared(){
-  const all = [
-    {title:"Proteins", items: filteredSafe(proteins)},
-    {title:"Carbs", items: filteredSafe(carbs)},
-    {title:"Veggies", items: filteredSafe(veggies)},
-    {title:"Fats", items: filteredSafe(fats)},
-    {title:"Flavor Boosters", items: filteredSafe(flavorBoosters)}
-  ];
+function renderLists(){
+  // Food list
+  const foodLines = [];
+  foodLines.push("<b>Coco — High</b><br>" + DATA.coco.high.map(escapeHtml).join(", "));
+  foodLines.push("<br><br><b>Coco — Moderate</b><br>" + DATA.coco.moderate.map(escapeHtml).join(", "));
+  foodLines.push("<br><br><b>Ollie — High</b><br>" + DATA.ollie.high.map(escapeHtml).join(", "));
+  foodLines.push("<br><br><b>Ollie — Moderate</b><br>" + DATA.ollie.moderate.map(escapeHtml).join(", "));
+  document.getElementById("foodList").innerHTML = foodLines.join("");
 
-  let html = "";
-  all.forEach(group=>{
-    html += `<div style="margin-bottom:14px"><b>${group.title}</b><div class="subtle">${group.items.join(", ") || "None available (filtered out)"}</div></div>`;
-  });
-
-  document.getElementById("sharedList").innerHTML = html;
+  // Additives list
+  const addLines = [];
+  addLines.push("<b>Coco — High</b><br>" + ADDITIVES.coco.high.map(escapeHtml).join(", "));
+  addLines.push("<br><br><b>Coco — Moderate</b><br>" + ADDITIVES.coco.moderate.map(escapeHtml).join(", "));
+  addLines.push("<br><br><b>Ollie — High</b><br>" + ADDITIVES.ollie.high.map(escapeHtml).join(", "));
+  addLines.push("<br><br><b>Ollie — Moderate</b><br>" + ADDITIVES.ollie.moderate.map(escapeHtml).join(", "));
+  document.getElementById("additiveList").innerHTML = addLines.join("");
 }
-loadShared();
+renderLists();
 
+/* =============================
+   SAFETY: HTML ESCAPE
+============================= */
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 </script>
-
 </body>
 </html>
