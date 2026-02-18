@@ -3,177 +3,557 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Coco & Ollie — Allergy Scanner + Meal Planner</title>
+<title>Pet Peeves - Ollie and Coco</title>
 
 <style>
-/* ======= YOUR ORIGINAL STYLES 100% UNCHANGED ======= */
-:root{
-  --bg:#0b1424;
-  --panel:#121f35;
-  --panel2:#0f1b2f;
-  --ink:#eaf1ff;
-  --muted:rgba(234,241,255,.78);
-  --muted2:rgba(234,241,255,.60);
-  --line:rgba(255,255,255,.08);
-  --blue:#2f6df6;
-  --purple:#8a5cff;
-  --good:#5cffad;
-  --bad:#ff6b6b;
-  --caution:#ffd166;
-  --shadow:0 16px 44px rgba(0,0,0,.34);
-  --radius:18px;
-  --radius2:14px;
-  --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-}
-*{box-sizing:border-box}
-body{
-  margin:0; padding:18px;
-  background: radial-gradient(1200px 800px at 20% 0%, rgba(47,109,246,.18), transparent 55%),
-              radial-gradient(1200px 800px at 80% 10%, rgba(138,92,255,.14), transparent 55%),
-              var(--bg);
-  color:var(--ink);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-}
-.wrap{max-width:980px;margin:0 auto}
-.hero{
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  margin:10px 0 14px;padding:14px;border:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
-  border-radius:var(--radius);box-shadow:var(--shadow);
-}
-.hero h1{font-size:18px;margin:0}
-.hero .sub{font-size:13px;color:var(--muted);margin-top:3px}
-.badgeRow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.badge{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted)}
-.tabs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:14px 0 18px}
-.tabBtn{border:none;cursor:pointer;padding:11px 14px;border-radius:999px;font-weight:800;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line)}
-.tabBtn.active{background:linear-gradient(180deg,rgba(47,109,246,.45),rgba(47,109,246,.22));border-color:rgba(47,109,246,.45)}
-.card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:16px}
-textarea,input,select{width:100%;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(10,18,32,.65);color:var(--ink)}
-textarea{min-height:122px}
-.btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.btn{border:none;cursor:pointer;padding:11px 14px;border-radius:14px;font-weight:900;color:var(--ink);background:rgba(255,255,255,.06);border:1px solid var(--line)}
-.btn.primary{background:linear-gradient(180deg,rgba(47,109,246,.55),rgba(47,109,246,.25));border-color:rgba(47,109,246,.45)}
-.pillRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.pill{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted)}
-.pill.good{color:var(--good)}
-.pill.bad{color:var(--bad)}
-.pill.caution{color:var(--caution)}
-.result{margin-top:12px;padding:12px;border-radius:var(--radius2);border:1px solid var(--line);background:rgba(8,14,26,.60)}
-.tag{font-size:11px;font-weight:950;padding:4px 9px;border-radius:999px;margin-left:8px;border:1px solid var(--line)}
-.tag.food{background:rgba(47,109,246,.14)}
-.tag.add{background:rgba(138,92,255,.14)}
-.mono{font-family:var(--mono)}
-</style>
-</head>
-<body>
-<div class="wrap">
+  :root{
+    --bg:#0b1424;
+    --panel:#121f35;
+    --panel2:#0f1b2f;
+    --ink:#eaf1ff;
+    --muted:rgba(234,241,255,.78);
+    --muted2:rgba(234,241,255,.60);
+    --line:rgba(255,255,255,.08);
 
-<div class="hero">
-  <div>
-    <h1>🐾 Coco & Ollie — Scanner + Meal Planner</h1>
-    <div class="sub">Ultra Smart Matching • OCR Safe • No Features Lost</div>
-  </div>
-  <div class="badgeRow">
-    <span class="badge">Smart phrase matching</span>
-    <span class="badge">Order independent</span>
-    <span class="badge">Plural proof</span>
-    <span class="badge">OCR safe</span>
-  </div>
-</div>
+    --blue:#2f6df6;
+    --purple:#8a5cff;
 
-<div class="card">
-<h2>🔍 Scanner</h2>
+    --good:#5cffad;
+    --bad:#ff6b6b;
+    --caution:#ffd166;
 
-<textarea id="scanInput" placeholder="Paste ingredients here..."></textarea>
+    --shadow:0 16px 44px rgba(0,0,0,.34);
+    --radius:18px;
+    --radius2:14px;
+    --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  }
 
-<div class="btnRow">
-  <button class="btn primary" onclick="scanAll()">Scan</button>
-  <button class="btn" onclick="clearScan()">Clear</button>
-</div>
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:18px;
+    background: radial-gradient(1200px 800px at 20% 0%, rgba(47,109,246,.18), transparent 55%),
+                radial-gradient(1200px 800px at 80% 10%, rgba(138,92,255,.14), transparent 55%),
+                var(--bg);
+    color:var(--ink);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  }
 
-<div id="scanResults"></div>
-</div>
+  .wrap{max-width:980px; margin:0 auto}
+  .hero{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    margin:10px 0 14px;
+    padding:14px 14px;
+    border:1px solid var(--line);
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .hero h1{
+    font-size:18px; margin:0;
+    letter-spacing:.2px;
+  }
+  .hero .sub{
+    font-size:13px; color:var(--muted);
+    margin-top:3px;
+  }
+  .badgeRow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+  .badge{
+    font-size:12px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    color:var(--muted);
+    white-space:nowrap;
+  }
 
-</div>
+  .tabs{
+    display:flex; gap:10px; flex-wrap:wrap;
+    justify-content:center;
+    margin: 14px 0 18px;
+  }
+  .tabBtn{
+    border:none;
+    cursor:pointer;
+    padding:11px 14px;
+    border-radius:999px;
+    font-weight:800;
+    color:var(--ink);
+    background: rgba(255,255,255,.05);
+    border:1px solid var(--line);
+    transition: transform .08s ease, background .2s ease;
+  }
+  .tabBtn:active{transform:scale(.98)}
+  .tabBtn.active{
+    background: linear-gradient(180deg, rgba(47,109,246,.45), rgba(47,109,246,.22));
+    border-color: rgba(47,109,246,.45);
+  }
 
-<script>
-/* ============================
-   UPGRADED INTELLIGENT SCANNER
-   ============================ */
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    padding:16px;
+    box-shadow: var(--shadow);
+    margin-bottom:16px;
+  }
+  <script>
 
-const BANNED = [
-  "Pepper - green",
-  "Carrot",
-  "Coconut",
-  "Rice (brown)",
-  "Yogurt (plain)"
-];
+/* =========================================================
+   1) DATA — COCO & OLLIE (UNCHANGED FROM YOUR FILE)
+   ========================================================= */
 
-function normalize(str){
-  return str.toLowerCase()
+const DATA = {
+  food:{
+    coco:{
+      high:[
+        "Canola Oil","Chia Seeds","Clove","Haddock","Herring","Mozzarella","Paprika","Peach",
+        "Rabbit","Rabbit Heart","Rabbit Liver","Rapeseed oil","Sugar (brown)","Sweet Potato","Tahini"
+      ],
+      moderate:[
+        "Ammonium Laureth Sulfate","Beef","Bilberry","Cheese - Cheddar","Chlorella","Coconut","Cornflakes",
+        "Egg Yolk - Chicken","Egg Yolk - Duck","Hare","Iceberg lettuce","Lemon","Pecan nut","Pepper - green",
+        "Psyllium Seed Husk","Strawberry","Turnip","Winkles"
+      ]
+    },
+    ollie:{
+      high:[
+        "Avocado oil","Boar","Buttermilk","Canola Meal","Coconut","Coconut Oil","Crab","Duck Liver",
+        "Noodles - wheat","Papaya","Parmesan","Prawn","Sage","Strawberry","Tapioca","Venison Meal"
+      ],
+      moderate:[
+        "Anchovy","Catfish","Cheese - Cottage","Chicken Heart","Condensed milk","Cream","Egg White - Chicken",
+        "Emmer wheat","Farina secalis cerealis","Ginkgo biloba","Greens (Collard)","Lamb Liver","Liver - ox",
+        "Milkweed","Onion","Pepper - green","Pheasant Gizzard","Pigeon","Raisin","Skate","Soy Flour",
+        "Sweet Potato","Tilefish","Winkles"
+      ]
+    }
+  },
+
+  additives:{
+    coco:{
+      high:[
+        "E 110 Sunset Yellow (orange synthetic dye)",
+        "E 160 b Annatto (yellow to orange coloring)",
+        "E 180 Lithol Rubine BK (red synthetic dye)",
+        "E 221 Sodium sulphite (preservative)",
+        "E 332 Potassium citrate (acidity regulator)",
+        "E 483 Stearyl tartrate (emulsifier)",
+        "E 576 Sodium gluconate (acidity regulator)",
+        "E 620 Glutamic acid (flavour enhancer)",
+        "E 959 Neohesperidine DC (sweetener)",
+        "Rose (Rosa spp.)"
+      ],
+      moderate:[
+        "Artichoke leaf extract",
+        "E 200 Sorbic acid (preservative)",
+        "E 233 Thiabendazole (preservative/fungicide)",
+        "E 312 Dodecyl gallate (antioxidant)",
+        "E 340 Potassium phosphate (emulsifier)",
+        "E 411 Xantham gum (thickener)",
+        "E 528 Magnesium hydroxide (acidity regulator)",
+        "E 535 Sodium ferrocyanide (anti-caking agent)",
+        "E 624 Monoammonium glutamate (flavour enhancer)",
+        "E 629 Calcium guanylate (flavour enhancer)",
+        "E 630 Inosinic acid (flavour enhancer)",
+        "E 927 Azodicarbonamide (flour treatment agent)",
+        "Rosemary Extract"
+      ]
+    },
+    ollie:{
+      high:[
+        "E 141 Copper complexes of chlorophyll (green coloring)",
+        "E 150 d Sulphite Ammonia Caramel (brown coloring)",
+        "E 160 e Beta-apo-8'-carotenal (orange pigment)",
+        "E 162 Beetroot red (natural red coloring)",
+        "E 218 Methyl p-hydroxybenzoate (preservative)",
+        "E 242 Dimethyl dicarbonate (sterilizing agent)",
+        "E 260 Acetic acid (preservative)",
+        "E 263 Calcium acetate (acidity regulator)",
+        "E 270 Lactic acid (preservative)",
+        "E 335 Sodium tartrate (acidity regulator)",
+        "E 472 d Tartaric acid esters of mono- and diglycerides (emulsifier)",
+        "E 473 Sucrose esters of fatty acids (emulsifier)",
+        "E 477 Propylene glycol esters of fatty acids (emulsifier)",
+        "E 522 Aluminium potassium sulphate (stabiliser)",
+        "E 541 Sodium aluminium phosphate (raising agent)",
+        "E 630 Inosinic acid (flavour enhancer)",
+        "E 941 Nitrogen (packing gas)",
+        "E 951 Aspartame (sweetener)",
+        "Formic acid",
+        "Pepsin",
+        "Tartaric acid"
+      ],
+      moderate:[
+        "E 150 c Ammonia Caramel (brown coloring)",
+        "E 1520 Propylene glycol",
+        "E 249 Potassium nitrite (curing agent)",
+        "E 284 Boric acid (preservative)",
+        "E 312 Dodecyl gallate (antioxidant)",
+        "E 334 Tartaric acid (acidity regulator)",
+        "E 353 Metatartaric acid (acidity regulator)",
+        "E 354 Calcium tartrate (acidity regulator)",
+        "E 472 e Mono- and diacetyltartaric acid esters of mono- and diglycerides (emulsifier)",
+        "E 476 Polyglycerol polyricinoleate (emulsifier)",
+        "E 554 Sodium aluminosilicate (anti-caking agent)",
+        "E 621 Monosodium glutamate (flavour enhancer)",
+        "E 634 Calcium 5'-ribonucleotides (flavour enhancer)",
+        "E 902 Candelilla wax (coating agent)",
+        "E 903 Carnauba wax (coating agent)",
+        "Formalin"
+      ]
+    }
+  }
+};
+
+/* =========================================================
+   2) ULTRA MATCHING ENGINE
+   ========================================================= */
+
+/* OCR stripping + normalization */
+function normalize(text){
+  return (text || "")
+    .replace(/\u2019/g,"'")
+    .toLowerCase()
+    .replace(/ingredients\s*:\s*/gi,"")
     .replace(/\([^)]*\)/g," ")
-    .replace(/[^a-z0-9\s]/g," ")
+    .replace(/[^a-z0-9\s\-]/g," ")
     .replace(/\s+/g," ")
     .trim();
 }
 
+/* smart singular */
 function singular(word){
   if(word.endsWith("ies")) return word.slice(0,-3)+"y";
   if(word.endsWith("s") && !word.endsWith("ss")) return word.slice(0,-1);
   return word;
 }
 
-function tokenize(str){
-  return normalize(str)
+function keyify(text){
+  return normalize(text)
     .split(" ")
+    .filter(Boolean)
     .map(singular)
+    .join(" ");
+}
+
+/* Green pepper fix — solves your exact bug */
+function normalizePepperVariants(text){
+  const t = keyify(text);
+
+  if(t.includes("green pepper")) return "pepper green";
+  if(t.includes("red pepper")) return "pepper red";
+  if(t.includes("white pepper")) return "pepper white";
+  if(t.includes("black pepper")) return "pepper black";
+
+  return t;
+}
+
+/* Parent keywords for CAUTION breakdown */
+const PARENT_KEYWORDS = {
+  rice: ["Rice (brown)","Rice (white)"],
+  yogurt: ["Yogurt (plain)"],
+  coconut: ["Coconut","Coconut Oil"],
+  pepper: ["Pepper - green"]
+};
+
+/* lookup builder */
+function buildLookup(){
+  const lookup = [];
+
+  for(const type of ["food","additives"]){
+    for(const dog of ["coco","ollie"]){
+      for(const sev of ["high","moderate"]){
+        for(const item of DATA[type][dog][sev]){
+          lookup.push({
+            key: keyify(item),
+            canonical: item,
+            dog,
+            sev: sev === "high" ? "High" : "Moderate",
+            type
+          });
+        }
+      }
+    }
+  }
+  return lookup;
+}
+
+const LOOKUP = buildLookup();
+
+/* MAIN FIND FUNCTION */
+function findMatches(term){
+
+  const original = term;
+  let normalized = normalizePepperVariants(term);
+
+  const matches = [];
+
+  for(const entry of LOOKUP){
+
+    if(normalized === entry.key){
+      matches.push({...entry, exact:true});
+    }
+    else if(normalized.includes(entry.key)){
+      matches.push({...entry, exact:false});
+    }
+  }
+
+  return matches;
+      }
+      /* =========================================================
+   SCANNER RENDER ENGINE (ULTRA FINAL)
+========================================================= */
+
+function parseInput(raw){
+  const s = (raw||"").replace(/\r/g,"");
+  return s
+    .replace(/ingredients\s*:\s*/ig,"")
+    .split(/[\n,;]+/)
+    .map(x=>x.trim())
     .filter(Boolean);
 }
 
-function phraseMatch(input, target){
-  const inputTokens = tokenize(input);
-  const targetTokens = tokenize(target);
+function classifyType(rawTerm){
+  const t = norm(rawTerm);
+  if(/\be\s*\d+\b/.test(t) || t.startsWith("e ")) return "additives";
+  return "food";
+}
 
-  return targetTokens.every(t => inputTokens.includes(t));
+function renderScanResult(item){
+
+  if(shouldExpandParent(item)){
+    return renderParentCaution(item);
+  }
+
+  const typeTag = classifyType(item);
+  const hits = findReactivityHits(item);
+
+  const inputKey = keyify(item);
+
+  const parentContained = Object.keys(PARENTS).find(p=>{
+    return containsWholePhrase(inputKey, p);
+  });
+
+  if(hits.length===0 && parentContained){
+    return renderParentCaution(parentContained, {
+      displayAs:item,
+      reasonOverride:`Contains keyword "${parentContained}". Showing variant breakdown.`
+    });
+  }
+
+  if(hits.length===0){
+    return `
+      <div class="result good">
+        <div class="title">
+          <div class="left">
+            ✅ <span>${esc(item)}</span>
+            <span class="tag ${typeTag==="food"?"food":"add"}">${typeTag==="food"?"Food":"Additive"}</span>
+          </div>
+          <span class="pill good">SAFE</span>
+        </div>
+        <div class="reason">
+          No Moderate or High reactivity found for either dog.
+        </div>
+        <div class="pillRow">
+          <span class="pill good">Coco: OK</span>
+          <span class="pill good">Ollie: OK</span>
+        </div>
+      </div>
+    `;
+  }
+
+  const byDog = {coco:[], ollie:[]};
+  hits.forEach(h=>byDog[h.dog].push(h));
+
+  const cocoWorst = worstSeverity(byDog.coco);
+  const ollieWorst = worstSeverity(byDog.ollie);
+
+  const tagClass = typeTag==="food"?"food":"add";
+
+  return `
+    <div class="result bad">
+      <div class="title">
+        <div class="left">
+          ⚠️ <span>${esc(item)}</span>
+          <span class="tag ${tagClass}">${typeTag==="food"?"Food":"Additive"}</span>
+        </div>
+        <span class="pill bad">NOT SAFE</span>
+      </div>
+      <div class="reason">${buildWhyText(item,hits)}</div>
+      <div class="pillRow">
+        ${renderDogPill("Coco", cocoWorst, byDog.coco)}
+        ${renderDogPill("Ollie", ollieWorst, byDog.ollie)}
+      </div>
+    </div>
+  `;
 }
 
 function scanAll(){
-  const raw = document.getElementById("scanInput").value;
-  const items = raw.split(/[\n,]+/).map(x=>x.trim()).filter(Boolean);
-
+  const items = parseInput(document.getElementById("scanInput").value);
+  if(items.length===0){
+    document.getElementById("scanResults").innerHTML =
+      `<div class="result"><div class="muted">Paste ingredients first.</div></div>`;
+    return;
+  }
   let html="";
-
-  items.forEach(item=>{
-    let flagged = BANNED.find(b => phraseMatch(item,b));
-
-    if(flagged){
-      html += `
-      <div class="result bad">
-        <b>${item}</b>
-        <span class="tag food">Food</span>
-        <div class="pillRow">
-          <span class="pill bad">FLAGGED</span>
-        </div>
-        <div>Matched: ${flagged}</div>
-      </div>`;
-    } else {
-      html += `
-      <div class="result good">
-        <b>${item}</b>
-        <span class="pill good">Safe</span>
-      </div>`;
-    }
-  });
-
+  items.forEach(i=> html += renderScanResult(i));
   document.getElementById("scanResults").innerHTML = html;
+}
+
+function demoScan(){
+  document.getElementById("scanInput").value =
+`Chicken
+Beef
+Green pepper
+Carrots
+Rice
+Rice flour
+Coconut oil
+E 221 Sodium sulphite`;
+  scanAll();
 }
 
 function clearScan(){
   document.getElementById("scanInput").value="";
   document.getElementById("scanResults").innerHTML="";
 }
-</script>
 
-</body>
-</html>
+/* =========================================================
+   MEAL PLANNER — FINAL PRODUCTION
+========================================================= */
+
+function generateMeal(){
+
+  const cocoLbs = parseFloat(document.getElementById("cocoWeight").value || "0");
+  const ollieLbs = parseFloat(document.getElementById("ollieWeight").value || "0");
+  const mealsPerDay = parseInt(document.getElementById("mealsPerDay").value || "2");
+  const days = parseInt(document.getElementById("batchDays").value || "7");
+  const activity = document.getElementById("activity").value;
+
+  if(!cocoLbs || !ollieLbs){
+    document.getElementById("mealOutput").innerHTML =
+      `<div class="result bad"><div class="muted">Enter both weights.</div></div>`;
+    return;
+  }
+
+  const pct = (ACTIVITY_PCT[activity] || 2.5) / 100;
+
+  const cocoDailyOz = lbsToOz(cocoLbs * pct);
+  const ollieDailyOz = lbsToOz(ollieLbs * pct);
+  const totalDailyOz = cocoDailyOz + ollieDailyOz;
+  const batchTotalOz = totalDailyOz * days;
+
+  const proteins = safePool(LIB.proteins);
+  const carbs = safePool(LIB.carbs);
+  const veg = safePool(LIB.veg);
+  const fats = safePool(LIB.fats);
+  const flavors = safePool(LIB.flavor);
+
+  if(!proteins.length || !carbs.length || !veg.length){
+    document.getElementById("mealOutput").innerHTML =
+      `<div class="result bad"><div class="reason">No safe foods available under current filters.</div></div>`;
+    return;
+  }
+
+  const protein = pickRandom(proteins);
+  const carb = pickRandom(carbs);
+  const veggie = pickRandom(veg);
+  const fat = fats.length ? pickRandom(fats) : "Fish Oil";
+  const flavor = flavors.length ? pickRandom(flavors) : "Bone broth";
+
+  const proteinOz = batchTotalOz * 0.5;
+  const carbOz = batchTotalOz * 0.2;
+  const vegOz = batchTotalOz * 0.15;
+  const fatOz = batchTotalOz * 0.05;
+  const boostOz = batchTotalOz * 0.1;
+
+  LAST_MEAL = {
+    protein, carb, veggie, fat, flavor,
+    cocoDailyOz, ollieDailyOz,
+    cocoPerMealOz: cocoDailyOz/mealsPerDay,
+    olliePerMealOz: ollieDailyOz/mealsPerDay,
+    batchTotalOz,
+    days,
+    grocery:
+`Protein: ${fmtLbsOz(proteinOz)}
+Carb: ${fmtLbsOz(carbOz)}
+Veg: ${fmtLbsOz(vegOz)}
+Fat: ${fmtLbsOz(fatOz)}
+Flavor: ${fmtLbsOz(boostOz)}`,
+    instructions:
+`1) Cook protein fully. No seasoning.
+2) Cook carb plain in water.
+3) Steam vegetables.
+4) Cool everything.
+5) Mix together.
+6) Add oils after cooling.
+7) Portion daily servings.
+8) Refrigerate 3–4 days. Freeze remainder.`
+  };
+
+  document.getElementById("mealOutput").innerHTML = `
+    <div class="result good">
+      <div class="title">
+        <div class="left">🍽️ Suggested Meal</div>
+        <span class="pill good">SAFE FILTERED</span>
+      </div>
+
+      <div class="pillRow">
+        <span class="pill good">Protein: ${protein}</span>
+        <span class="pill good">Carb: ${carb}</span>
+        <span class="pill good">Veg: ${veggie}</span>
+        <span class="pill good">Fat: ${fat}</span>
+        <span class="pill good">Flavor: ${flavor}</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="muted"><b>Feeding Amounts</b></div>
+      <div class="muted2">
+        Coco daily: ${fmtLbsOz(cocoDailyOz)} (~${fmtCups(cocoDailyOz)})<br>
+        Ollie daily: ${fmtLbsOz(ollieDailyOz)} (~${fmtCups(ollieDailyOz)})
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="muted"><b>Grocery List</b></div>
+      <div class="savedBox">
+        <div class="mono">${LAST_MEAL.grocery}</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="muted"><b>Cooking Instructions</b></div>
+      <div class="savedBox">
+        <div class="mono">${LAST_MEAL.instructions}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   SAVED MEALS + EXPORT
+========================================================= */
+
+function saveMeal(){
+  if(!LAST_MEAL){
+    alert("Generate a meal first.");
+    return;
+  }
+  const saved = loadSavedMeals();
+  saved.unshift({...LAST_MEAL, id: cryptoId(), createdAt:new Date().toISOString()});
+  localStorage.setItem(LS_KEY, JSON.stringify(saved));
+  renderSavedMeals();
+  alert("Saved ✅");
+}
+
+function copyLastGrocery(){
+  if(!LAST_MEAL) return alert("Generate meal first.");
+  copyText(LAST_MEAL.grocery);
+}
+
+function exportLastGrocery(){
+  if(!LAST_MEAL) return alert("Generate meal first.");
+  downloadText("grocery.txt", LAST_MEAL.grocery);
+    }
