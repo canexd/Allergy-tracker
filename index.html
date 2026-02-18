@@ -3,105 +3,230 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Pet Peeves - Ollie and Coco</title>
+<title>Pet Peeves — Ollie & Coco</title>
 
 <style>
-  :root{
-    --bg:#0b1424;
-    --panel:#121f35;
-    --panel2:#0f1b2f;
-    --ink:#eaf1ff;
-    --muted:rgba(234,241,255,.78);
-    --muted2:rgba(234,241,255,.60);
-    --line:rgba(255,255,255,.08);
+:root{
+  --bg:#0b1424;
+  --panel:#121f35;
+  --panel2:#0f1b2f;
+  --ink:#eaf1ff;
+  --muted:rgba(234,241,255,.78);
+  --muted2:rgba(234,241,255,.60);
+  --line:rgba(255,255,255,.08);
 
-    --blue:#2f6df6;
-    --purple:#8a5cff;
+  --blue:#2f6df6;
+  --purple:#8a5cff;
 
-    --good:#5cffad;
-    --bad:#ff6b6b;
-    --caution:#ffd166;
+  --good:#5cffad;
+  --bad:#ff6b6b;
+  --caution:#ffd166;
 
-    --shadow:0 16px 44px rgba(0,0,0,.34);
-    --radius:18px;
-    --radius2:14px;
-    --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  }
+  --shadow:0 16px 44px rgba(0,0,0,.34);
+  --radius:18px;
+  --radius2:14px;
+  --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+}
 
-  *{box-sizing:border-box}
-  body{
-    margin:0; padding:18px;
-    background: radial-gradient(1200px 800px at 20% 0%, rgba(47,109,246,.18), transparent 55%),
-                radial-gradient(1200px 800px at 80% 10%, rgba(138,92,255,.14), transparent 55%),
-                var(--bg);
-    color:var(--ink);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  }
+*{box-sizing:border-box}
+body{
+  margin:0; padding:18px;
+  background: radial-gradient(1200px 800px at 20% 0%, rgba(47,109,246,.18), transparent 55%),
+              radial-gradient(1200px 800px at 80% 10%, rgba(138,92,255,.14), transparent 55%),
+              var(--bg);
+  color:var(--ink);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
 
-  .wrap{max-width:980px; margin:0 auto}
-  .hero{
-    display:flex; align-items:center; justify-content:space-between; gap:14px;
-    margin:10px 0 14px;
-    padding:14px 14px;
-    border:1px solid var(--line);
-    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-  }
-  .hero h1{
-    font-size:18px; margin:0;
-    letter-spacing:.2px;
-  }
-  .hero .sub{
-    font-size:13px; color:var(--muted);
-    margin-top:3px;
-  }
-  .badgeRow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
-  .badge{
-    font-size:12px;
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.04);
-    color:var(--muted);
-    white-space:nowrap;
-  }
+.wrap{max-width:980px; margin:0 auto}
 
-  .tabs{
-    display:flex; gap:10px; flex-wrap:wrap;
-    justify-content:center;
-    margin: 14px 0 18px;
-  }
-  .tabBtn{
-    border:none;
-    cursor:pointer;
-    padding:11px 14px;
-    border-radius:999px;
-    font-weight:800;
-    color:var(--ink);
-    background: rgba(255,255,255,.05);
-    border:1px solid var(--line);
-    transition: transform .08s ease, background .2s ease;
-  }
-  .tabBtn:active{transform:scale(.98)}
-  .tabBtn.active{
-    background: linear-gradient(180deg, rgba(47,109,246,.45), rgba(47,109,246,.22));
-    border-color: rgba(47,109,246,.45);
-  }
+.hero{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  margin:10px 0 14px;
+  padding:14px;
+  border:1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.hero h1{font-size:18px; margin:0}
+.hero .sub{font-size:13px; color:var(--muted)}
 
-  .card{
-    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
-    border:1px solid var(--line);
-    border-radius: var(--radius);
-    padding:16px;
-    box-shadow: var(--shadow);
-    margin-bottom:16px;
-  }
-  <script>
+.badgeRow{display:flex; gap:8px; flex-wrap:wrap}
+.badge{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.04);
+  color:var(--muted);
+}
 
-/* =========================================================
-   1) DATA — COCO & OLLIE (UNCHANGED FROM YOUR FILE)
-   ========================================================= */
+.tabs{
+  display:flex; gap:10px; flex-wrap:wrap;
+  justify-content:center;
+  margin:14px 0 18px;
+}
+
+.tabBtn{
+  border:none;
+  cursor:pointer;
+  padding:11px 14px;
+  border-radius:999px;
+  font-weight:800;
+  color:var(--ink);
+  background: rgba(255,255,255,.05);
+  border:1px solid var(--line);
+}
+.tabBtn.active{
+  background: linear-gradient(180deg, rgba(47,109,246,.45), rgba(47,109,246,.22));
+  border-color: rgba(47,109,246,.45);
+}
+
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+  border:1px solid var(--line);
+  border-radius: var(--radius);
+  padding:16px;
+  box-shadow: var(--shadow);
+  margin-bottom:16px;
+}
+
+textarea,input,select{
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background: rgba(10,18,32,.65);
+  color:var(--ink);
+  font-size:16px;
+}
+textarea{min-height:120px}
+
+.btnRow{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+.btn{
+  border:none; cursor:pointer;
+  padding:11px 14px;
+  border-radius:14px;
+  font-weight:900;
+  color:var(--ink);
+  background: rgba(255,255,255,.06);
+  border:1px solid var(--line);
+}
+.btn.primary{
+  background: linear-gradient(180deg, rgba(47,109,246,.55), rgba(47,109,246,.25));
+}
+.btn.purple{
+  background: linear-gradient(180deg, rgba(138,92,255,.50), rgba(138,92,255,.22));
+}
+
+.result{
+  margin-top:12px;
+  padding:12px;
+  border-radius: var(--radius2);
+  border:1px solid var(--line);
+  background: rgba(8,14,26,.60);
+}
+.result.good{border-color: rgba(92,255,173,.22)}
+.result.bad{border-color: rgba(255,107,107,.22)}
+.result.caution{border-color: rgba(255,209,102,.22)}
+
+.pillRow{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+.pill{
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  border:1px solid var(--line);
+  background: rgba(255,255,255,.04);
+}
+.pill.good{color:var(--good)}
+.pill.bad{color:var(--bad)}
+.pill.caution{color:var(--caution)}
+
+.tag{
+  font-size:11px;
+  padding:4px 8px;
+  border-radius:999px;
+  margin-left:8px;
+  border:1px solid var(--line);
+}
+.tag.food{color:#cfe0ff}
+.tag.add{color:#e3d7ff}
+
+.savedCard{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px;
+  margin-top:12px;
+}
+
+.savedBox{
+  border:1px solid var(--line);
+  border-radius:var(--radius2);
+  padding:10px;
+  margin-top:10px;
+}
+
+.mono{font-family:var(--mono); white-space:pre-wrap}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div>
+    <h1>🐾 Pet Peeves — Ollie & Coco</h1>
+    <div class="sub">Food + Additives • Smart Scan • Meal Planner • Saved Meals</div>
+  </div>
+  <div class="badgeRow">
+    <span class="badge">Smart plurals</span>
+    <span class="badge">OCR safe</span>
+    <span class="badge">Variant caution</span>
+    <span class="badge">US units</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tabBtn active" id="tab-scanner" onclick="showTab('scanner')">Scanner</button>
+  <button class="tabBtn" id="tab-meal" onclick="showTab('meal')">Meal Planner</button>
+  <button class="tabBtn" id="tab-saved" onclick="showTab('saved')">Saved Meals</button>
+  <button class="tabBtn" id="tab-lists" onclick="showTab('lists')">Lists</button>
+</div>
+
+<div id="scanner" class="card">
+  <h2>🔍 Scanner</h2>
+  <textarea id="scanInput" placeholder="Paste ingredients here..."></textarea>
+  <div class="btnRow">
+    <button class="btn primary" onclick="scanAll()">Scan</button>
+    <button class="btn" onclick="demoScan()">Demo</button>
+    <button class="btn" onclick="clearScan()">Clear</button>
+  </div>
+  <div id="scanResults"></div>
+</div>
+
+<div id="meal" class="card" style="display:none">
+  <h2>🍲 Meal Planner</h2>
+  <div id="mealOutput"></div>
+</div>
+
+<div id="saved" class="card" style="display:none">
+  <h2>💾 Saved Meals</h2>
+  <div id="savedMeals"></div>
+</div>
+
+<div id="lists" class="card" style="display:none">
+  <h2>📚 Lists</h2>
+  <div id="listCombined"></div>
+</div>
+
+</div>
+
+<script>
+  /* =========================================================
+   DATA — COCO & OLLIE (FOOD + ADDITIVES)
+========================================================= */
 
 const DATA = {
   food:{
@@ -180,9 +305,7 @@ const DATA = {
         "E 630 Inosinic acid (flavour enhancer)",
         "E 941 Nitrogen (packing gas)",
         "E 951 Aspartame (sweetener)",
-        "Formic acid",
-        "Pepsin",
-        "Tartaric acid"
+        "Formic acid","Pepsin","Tartaric acid"
       ],
       moderate:[
         "E 150 c Ammonia Caramel (brown coloring)",
@@ -206,109 +329,122 @@ const DATA = {
   }
 };
 
-/* =========================================================
-   2) ULTRA MATCHING ENGINE
-   ========================================================= */
 
-/* OCR stripping + normalization */
-function normalize(text){
-  return (text || "")
+/* =========================================================
+   ULTRA MATCH ENGINE
+========================================================= */
+
+// Normalize text (OCR-safe)
+function norm(str){
+  return (str||"")
     .replace(/\u2019/g,"'")
     .toLowerCase()
-    .replace(/ingredients\s*:\s*/gi,"")
-    .replace(/\([^)]*\)/g," ")
+    .replace(/ingredients\s*:\s*/ig,"")
+    .replace(/\([^)]*\)/g,"")        // remove parenthesis notes
     .replace(/[^a-z0-9\s\-]/g," ")
     .replace(/\s+/g," ")
     .trim();
 }
 
-/* smart singular */
-function singular(word){
-  if(word.endsWith("ies")) return word.slice(0,-3)+"y";
-  if(word.endsWith("s") && !word.endsWith("ss")) return word.slice(0,-1);
-  return word;
+// singularize words
+function singular(w){
+  if(w.endsWith("ies")) return w.slice(0,-3)+"y";
+  if(w.endsWith("s") && !w.endsWith("ss")) return w.slice(0,-1);
+  return w;
 }
 
-function keyify(text){
-  return normalize(text)
+function keyify(str){
+  return norm(str)
+    .replace(/\-/g," ")
     .split(" ")
     .filter(Boolean)
     .map(singular)
     .join(" ");
 }
 
-/* Green pepper fix — solves your exact bug */
-function normalizePepperVariants(text){
-  const t = keyify(text);
-
-  if(t.includes("green pepper")) return "pepper green";
-  if(t.includes("red pepper")) return "pepper red";
-  if(t.includes("white pepper")) return "pepper white";
-  if(t.includes("black pepper")) return "pepper black";
-
-  return t;
+function tokens(str){
+  return keyify(str).split(" ");
 }
 
-/* Parent keywords for CAUTION breakdown */
-const PARENT_KEYWORDS = {
-  rice: ["Rice (brown)","Rice (white)"],
-  yogurt: ["Yogurt (plain)"],
-  coconut: ["Coconut","Coconut Oil"],
-  pepper: ["Pepper - green"]
+// order-insensitive phrase containment
+function containsAllWords(hay, needle){
+  const h = tokens(hay);
+  const n = tokens(needle);
+  return n.every(word => h.includes(word));
+}
+
+// Build lookup maps
+function buildLookup(list){
+  const map = new Map();
+  list.forEach(item => map.set(keyify(item), item));
+  return map;
+}
+
+const LOOK = {
+  food:{
+    coco:{
+      high: buildLookup(DATA.food.coco.high),
+      moderate: buildLookup(DATA.food.coco.moderate)
+    },
+    ollie:{
+      high: buildLookup(DATA.food.ollie.high),
+      moderate: buildLookup(DATA.food.ollie.moderate)
+    }
+  },
+  additives:{
+    coco:{
+      high: buildLookup(DATA.additives.coco.high),
+      moderate: buildLookup(DATA.additives.coco.moderate)
+    },
+    ollie:{
+      high: buildLookup(DATA.additives.ollie.high),
+      moderate: buildLookup(DATA.additives.ollie.moderate)
+    }
+  }
 };
 
-/* lookup builder */
-function buildLookup(){
-  const lookup = [];
+// Parent keyword groups
+const PARENTS = {
+  rice:["Rice (brown)","Rice (white)","Rice Flour","Rice Bran","Rice milk"],
+  yogurt:["Yogurt (plain)"],
+  pepper:["Pepper - green","Pepper - red","Pepper - white","Pepper - black"],
+  egg:["Egg Yolk - Chicken","Egg White - Chicken","Egg Yolk - Duck","Egg White - Duck"]
+};
 
-  for(const type of ["food","additives"]){
-    for(const dog of ["coco","ollie"]){
-      for(const sev of ["high","moderate"]){
-        for(const item of DATA[type][dog][sev]){
-          lookup.push({
-            key: keyify(item),
-            canonical: item,
-            dog,
-            sev: sev === "high" ? "High" : "Moderate",
-            type
-          });
-        }
-      }
-    }
-  }
-  return lookup;
+
+// Main match finder
+function findReactivityHits(input){
+
+  const hits=[];
+  const inputKey = keyify(input);
+
+  ["food","additives"].forEach(type=>{
+    ["coco","ollie"].forEach(dog=>{
+      ["high","moderate"].forEach(level=>{
+        LOOK[type][dog][level].forEach((canonical, key)=>{
+          if(containsAllWords(inputKey, key)){
+            hits.push({
+              type,
+              dog,
+              severity: level==="high"?"High":"Moderate",
+              canonical
+            });
+          }
+        });
+      });
+    });
+  });
+
+  return hits;
 }
-
-const LOOKUP = buildLookup();
-
-/* MAIN FIND FUNCTION */
-function findMatches(term){
-
-  const original = term;
-  let normalized = normalizePepperVariants(term);
-
-  const matches = [];
-
-  for(const entry of LOOKUP){
-
-    if(normalized === entry.key){
-      matches.push({...entry, exact:true});
-    }
-    else if(normalized.includes(entry.key)){
-      matches.push({...entry, exact:false});
-    }
-  }
-
-  return matches;
-      }
-      /* =========================================================
-   SCANNER RENDER ENGINE (ULTRA FINAL)
+  /* =========================================================
+   SCANNER RENDER ENGINE — FINAL
 ========================================================= */
 
 function parseInput(raw){
-  const s = (raw||"").replace(/\r/g,"");
-  return s
-    .replace(/ingredients\s*:\s*/ig,"")
+  return (raw||"")
+    .replace(/\r/g,"")
+    .replace(/ingredients\s*:/ig,"")
     .split(/[\n,;]+/)
     .map(x=>x.trim())
     .filter(Boolean);
@@ -332,11 +468,12 @@ function renderScanResult(item){
   const inputKey = keyify(item);
 
   const parentContained = Object.keys(PARENTS).find(p=>{
+    if(p==="rice" && isSpecificRice(inputKey)) return false;
     return containsWholePhrase(inputKey, p);
   });
 
   if(hits.length===0 && parentContained){
-    return renderParentCaution(parentContained, {
+    return renderParentCaution(parentContained,{
       displayAs:item,
       reasonOverride:`Contains keyword "${parentContained}". Showing variant breakdown.`
     });
@@ -369,14 +506,12 @@ function renderScanResult(item){
   const cocoWorst = worstSeverity(byDog.coco);
   const ollieWorst = worstSeverity(byDog.ollie);
 
-  const tagClass = typeTag==="food"?"food":"add";
-
   return `
     <div class="result bad">
       <div class="title">
         <div class="left">
           ⚠️ <span>${esc(item)}</span>
-          <span class="tag ${tagClass}">${typeTag==="food"?"Food":"Additive"}</span>
+          <span class="tag ${typeTag==="food"?"food":"add"}">${typeTag==="food"?"Food":"Additive"}</span>
         </div>
         <span class="pill bad">NOT SAFE</span>
       </div>
@@ -389,27 +524,29 @@ function renderScanResult(item){
   `;
 }
 
+/* =========================================================
+   SCANNER UI
+========================================================= */
+
 function scanAll(){
   const items = parseInput(document.getElementById("scanInput").value);
-  if(items.length===0){
+  if(!items.length){
     document.getElementById("scanResults").innerHTML =
       `<div class="result"><div class="muted">Paste ingredients first.</div></div>`;
     return;
   }
-  let html="";
-  items.forEach(i=> html += renderScanResult(i));
-  document.getElementById("scanResults").innerHTML = html;
+  document.getElementById("scanResults").innerHTML =
+    items.map(renderScanResult).join("");
 }
 
 function demoScan(){
   document.getElementById("scanInput").value =
 `Chicken
-Beef
 Green pepper
 Carrots
 Rice
 Rice flour
-Coconut oil
+Yogurt
 E 221 Sodium sulphite`;
   scanAll();
 }
@@ -420,140 +557,50 @@ function clearScan(){
 }
 
 /* =========================================================
-   MEAL PLANNER — FINAL PRODUCTION
+   UTILITIES + TAB LOGIC
 ========================================================= */
 
-function generateMeal(){
+function showTab(tab){
+  ["scanner","meal","saved","lists"].forEach(t=>{
+    document.getElementById(t).style.display = (t===tab)?"block":"none";
+    document.getElementById("tab-"+t).classList.toggle("active",t===tab);
+  });
+  if(tab==="saved") renderSavedMeals();
+  if(tab==="lists") renderLists();
+}
 
-  const cocoLbs = parseFloat(document.getElementById("cocoWeight").value || "0");
-  const ollieLbs = parseFloat(document.getElementById("ollieWeight").value || "0");
-  const mealsPerDay = parseInt(document.getElementById("mealsPerDay").value || "2");
-  const days = parseInt(document.getElementById("batchDays").value || "7");
-  const activity = document.getElementById("activity").value;
+function esc(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 
-  if(!cocoLbs || !ollieLbs){
-    document.getElementById("mealOutput").innerHTML =
-      `<div class="result bad"><div class="muted">Enter both weights.</div></div>`;
-    return;
-  }
+function copyText(text){
+  navigator.clipboard.writeText(text);
+}
 
-  const pct = (ACTIVITY_PCT[activity] || 2.5) / 100;
+function downloadText(filename,text){
+  const blob=new Blob([text],{type:"text/plain"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
-  const cocoDailyOz = lbsToOz(cocoLbs * pct);
-  const ollieDailyOz = lbsToOz(ollieLbs * pct);
-  const totalDailyOz = cocoDailyOz + ollieDailyOz;
-  const batchTotalOz = totalDailyOz * days;
-
-  const proteins = safePool(LIB.proteins);
-  const carbs = safePool(LIB.carbs);
-  const veg = safePool(LIB.veg);
-  const fats = safePool(LIB.fats);
-  const flavors = safePool(LIB.flavor);
-
-  if(!proteins.length || !carbs.length || !veg.length){
-    document.getElementById("mealOutput").innerHTML =
-      `<div class="result bad"><div class="reason">No safe foods available under current filters.</div></div>`;
-    return;
-  }
-
-  const protein = pickRandom(proteins);
-  const carb = pickRandom(carbs);
-  const veggie = pickRandom(veg);
-  const fat = fats.length ? pickRandom(fats) : "Fish Oil";
-  const flavor = flavors.length ? pickRandom(flavors) : "Bone broth";
-
-  const proteinOz = batchTotalOz * 0.5;
-  const carbOz = batchTotalOz * 0.2;
-  const vegOz = batchTotalOz * 0.15;
-  const fatOz = batchTotalOz * 0.05;
-  const boostOz = batchTotalOz * 0.1;
-
-  LAST_MEAL = {
-    protein, carb, veggie, fat, flavor,
-    cocoDailyOz, ollieDailyOz,
-    cocoPerMealOz: cocoDailyOz/mealsPerDay,
-    olliePerMealOz: ollieDailyOz/mealsPerDay,
-    batchTotalOz,
-    days,
-    grocery:
-`Protein: ${fmtLbsOz(proteinOz)}
-Carb: ${fmtLbsOz(carbOz)}
-Veg: ${fmtLbsOz(vegOz)}
-Fat: ${fmtLbsOz(fatOz)}
-Flavor: ${fmtLbsOz(boostOz)}`,
-    instructions:
-`1) Cook protein fully. No seasoning.
-2) Cook carb plain in water.
-3) Steam vegetables.
-4) Cool everything.
-5) Mix together.
-6) Add oils after cooling.
-7) Portion daily servings.
-8) Refrigerate 3–4 days. Freeze remainder.`
-  };
-
-  document.getElementById("mealOutput").innerHTML = `
-    <div class="result good">
-      <div class="title">
-        <div class="left">🍽️ Suggested Meal</div>
-        <span class="pill good">SAFE FILTERED</span>
-      </div>
-
-      <div class="pillRow">
-        <span class="pill good">Protein: ${protein}</span>
-        <span class="pill good">Carb: ${carb}</span>
-        <span class="pill good">Veg: ${veggie}</span>
-        <span class="pill good">Fat: ${fat}</span>
-        <span class="pill good">Flavor: ${flavor}</span>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="muted"><b>Feeding Amounts</b></div>
-      <div class="muted2">
-        Coco daily: ${fmtLbsOz(cocoDailyOz)} (~${fmtCups(cocoDailyOz)})<br>
-        Ollie daily: ${fmtLbsOz(ollieDailyOz)} (~${fmtCups(ollieDailyOz)})
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="muted"><b>Grocery List</b></div>
-      <div class="savedBox">
-        <div class="mono">${LAST_MEAL.grocery}</div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="muted"><b>Cooking Instructions</b></div>
-      <div class="savedBox">
-        <div class="mono">${LAST_MEAL.instructions}</div>
-      </div>
-    </div>
-  `;
+function cryptoId(){
+  return "m_"+Math.random().toString(16).slice(2)+"_"+Date.now().toString(16);
 }
 
 /* =========================================================
-   SAVED MEALS + EXPORT
+   INIT
 ========================================================= */
 
-function saveMeal(){
-  if(!LAST_MEAL){
-    alert("Generate a meal first.");
-    return;
-  }
-  const saved = loadSavedMeals();
-  saved.unshift({...LAST_MEAL, id: cryptoId(), createdAt:new Date().toISOString()});
-  localStorage.setItem(LS_KEY, JSON.stringify(saved));
-  renderSavedMeals();
-  alert("Saved ✅");
-}
-
-function copyLastGrocery(){
-  if(!LAST_MEAL) return alert("Generate meal first.");
-  copyText(LAST_MEAL.grocery);
-}
-
-function exportLastGrocery(){
-  if(!LAST_MEAL) return alert("Generate meal first.");
-  downloadText("grocery.txt", LAST_MEAL.grocery);
-    }
+renderSavedMeals();
+</script>
+</body>
+</html>
